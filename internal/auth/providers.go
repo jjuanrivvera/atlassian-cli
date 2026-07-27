@@ -263,9 +263,13 @@ func AccessibleResources(ctx context.Context, httpClient *http.Client, accessTok
 // Build assembles the authenticator a site's config calls for, loading its secret from the
 // store. It is the single place that knows how a stored Credential maps onto each method.
 func Build(site *config.Site, store Store) (*Built, error) {
+	// A keyring read that fails outright — no Secret Service on a headless Linux box, a locked
+	// keychain — must NOT abort here. The environment may well supply the credential (that is
+	// how CI and containers run), and it is read below. If nothing supplies one, the
+	// authenticator's own error names the fix, which is far more useful than a D-Bus error.
 	cred, err := store.Get(site.Name)
 	if err != nil && !errors.Is(err, ErrNotFound) {
-		return nil, err
+		cred = Credential{}
 	}
 
 	// Environment credentials win over stored ones, so CI can run without touching a keyring.

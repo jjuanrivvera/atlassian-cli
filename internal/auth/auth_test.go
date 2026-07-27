@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -365,4 +366,54 @@ func (m *memStore) Delete(site string) error {
 	}
 	delete(m.creds, site)
 	return nil
+}
+
+// brokenStore stands in for a machine where the keyring exists but cannot be read: a headless
+// Linux box with no Secret Service, or a locked keychain.
+type brokenStore struct{}
+
+func (brokenStore) Backend() string { return "broken" }
+func (brokenStore) Get(string) (Credential, error) {
+	return Credential{}, errors.New("read keyring: dbus: couldn't determine address of session bus")
+}
+func (brokenStore) Set(string, Credential) error { return errors.New("unavailable") }
+func (brokenStore) Delete(string) error          { return errors.New("unavailable") }
+
+func TestBuild_KeyringFailureDoesNotBlockEnvCredentials(t *testing.T) {
+	// This is how CI and containers run: no Secret Service, credentials from the environment.
+	// A hard failure on the keyring read would make the CLI unusable there even though the
+	// credential it needs is sitting in an env var.
+	old := osGetenv
+	osGetenv = func(k string) string {
+		if k == config.EnvPrefix+"API_TOKEN" {
+			return "env-token"
+		}
+		return ""
+	}
+	defer func() { osGetenv = old }()
+
+	site := &config.Site{Name: "s", BaseURL: "https://x.atlassian.net", AuthMethod: config.MethodPAT}
+	built, err := Build(site, brokenStore{})
+	require.NoError(t, err, "an unreadable keyring must not abort when the env supplies the credential")
+	assert.Equal(t, "env-token", built.Credential.Token)
+
+	req := httptest.NewRequest(http.MethodGet, "https://x/", nil)
+	require.NoError(t, built.Authenticator.Apply(context.Background(), req))
+	assert.Equal(t, "Bearer env-token", req.Header.Get("Authorization"))
+}
+
+func TestBuild_KeyringFailureWithNoEnvGivesTheActionableError(t *testing.T) {
+	old := osGetenv
+	osGetenv = func(string) string { return "" }
+	defer func() { osGetenv = old }()
+
+	site := &config.Site{Name: "s", BaseURL: "https://x.atlassian.net", AuthMethod: config.MethodPAT}
+	built, err := Build(site, brokenStore{})
+	require.NoError(t, err)
+	assert.False(t, built.HasCredential())
+
+	// The failure should name the fix rather than surfacing a D-Bus error.
+	err = built.Authenticator.Apply(context.Background(), httptest.NewRequest(http.MethodGet, "https://x/", nil))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "auth login")
 }

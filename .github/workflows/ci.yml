@@ -1,3 +1,5 @@
+# CI — delegates to the fleet-canonical reusable workflow in jjuanrivvera/.github.
+# Change fleet-wide CI policy there, not here. Only repo-specific inputs live below.
 name: CI
 
 on:
@@ -9,111 +11,38 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          # go-version-file, never `stable`: `stable` grabs the newest Go, so govulncheck
-          # runs against an already-patched stdlib and stays green while the declared
-          # toolchain floor is still vulnerable.
-          go-version-file: go.mod
-      - name: gofmt
-        run: |
-          out="$(gofmt -s -l .)"
-          if [ -n "$out" ]; then echo "gofmt -s needed:"; echo "$out"; exit 1; fi
-      - name: go vet
-        run: go vet ./...
-      - name: golangci-lint
-        # Built from source with the job's Go. A pinned or prebuilt linter lags the
-        # toolchain and cannot analyze a module already on the next Go release.
-        run: |
-          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
-          golangci-lint run ./...
-      - name: docs drift
-        run: |
-          go run ./tools/gendocs
-          git diff --exit-code -- docs/commands
-
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-      - name: govulncheck
-        run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
-      - name: gosec
-        run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec -severity high -confidence medium ./...
-
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-      - name: test
-        run: go test -race ./...
-      - name: coverage gate
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          go test ./... -coverprofile=coverage.out -coverpkg=./...
-          total="$(go tool cover -func=coverage.out | awk '/^total:/ {print substr($3, 1, length($3)-1)}')"
-          echo "total coverage: ${total}%"
-          awk -v t="$total" 'BEGIN { exit (t+0 >= 80) ? 0 : 1 }' \
-            || { echo "coverage ${total}% is below the 80% gate"; exit 1; }
-      - uses: codecov/codecov-action@v5
-        if: matrix.os == 'ubuntu-latest'
-        with:
-          files: coverage.out
-        continue-on-error: true
+  ci:
+    uses: jjuanrivvera/.github/.github/workflows/go-ci.yml@main
+    with:
+      coverage-threshold: "80"
+      # This repo's coverage comes largely from commands_test driving internal/api against a
+      # mock Atlassian, so the cross-package statements have to be credited.
+      coverpkg: true
+      run-gosec: true
+      run-docs-check: true
+      run-build: true
 
   gates:
-    # The cliwright determinism gates: the built surface must match the manifest, and the
-    # manifest must still wrap the whole enumerated API.
+    # The cliwright determinism gates are deliberately NOT part of the reusable workflow, so
+    # they are wired here rather than re-inlined across the fleet.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
+      - name: install the tools the gate scripts use
+        # dod-check.sh greps with ripgrep and the installer is shellchecked; neither tool is
+        # on the runner by default, and a missing tool makes every check using it "fail".
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ripgrep shellcheck
       - run: make build
-      - run: ./scripts/spec-check.sh
-      - run: ./scripts/spec-completeness.sh api-manifest.json 90
-      - run: ./scripts/dod-check.sh atlassian
-      - name: shellcheck the installer
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
-          shellcheck install.sh scripts/*.sh
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with: {fetch-depth: 0}
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-      - name: shell completions
-        run: |
-          go build -o bin/atlassian ./cmd/atlassian
-          ./scripts/completions.sh
-      - name: goreleaser check
-        # Runs on every PR so a deprecated or invalid config breaks here, not at tag time
-        # when the release is already half-done.
-        uses: goreleaser/goreleaser-action@v6
-        with: {version: latest, args: check}
-      - name: goreleaser snapshot
-        uses: goreleaser/goreleaser-action@v6
-        with: {version: latest, args: release --snapshot --clean --skip=sign,sbom,publish}
+      - name: surface matches the manifest
+        run: ./scripts/spec-check.sh
+      - name: manifest still wraps the whole enumerated API
+        run: ./scripts/spec-completeness.sh api-manifest.json 90
+      - name: definition of done
+        run: ./scripts/dod-check.sh atlassian
+      - name: shellcheck
+        run: shellcheck install.sh scripts/*.sh
