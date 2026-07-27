@@ -24,8 +24,10 @@ func init() {
   atlassian boards list --project PP
   atlassian boards issues 42 --max 20
   atlassian boards backlog 42`),
-		New:     func(c *api.Client) *api.Resource[api.Board] { return c.Boards() },
-		Columns: []string{"id", "name", "type", "location.projectKey", "location.projectName"},
+		New: func(c *api.Client) *api.Resource[api.Board] { return c.Boards() },
+		// `location` is a reference object and collapses to its display name when flattened,
+		// so the sub-paths under it never exist as columns.
+		Columns: []string{"id", "name", "type", "location"},
 		ListFilters: []listFilter{
 			{Flag: "project", Query: "projectKeyOrId", Usage: "boards for this project key or id"},
 			{Flag: "name", Query: "name", Usage: "match the board name"},

@@ -9,6 +9,15 @@ saving — so a typo fails here rather than on the next command.
 
 The token is read without echoing when the terminal is interactive; pass --token to script it.
 
+OAuth needs an app registered at https://developer.atlassian.com/console/myapps/ with its
+callback URL set to exactly:
+
+    http://127.0.0.1:8990/callback
+
+Atlassian matches that URL exactly and supports no wildcard port, which is why the port is
+fixed rather than chosen per run. Use --port if something else already holds it (and register
+the matching URL), or --mode oob to paste the code by hand on a machine with no browser.
+
 ```
 atlassian auth login [flags]
 ```
@@ -31,6 +40,7 @@ atlassian auth login                                   # Cloud: email + API toke
   -h, --help                   help for login
       --method string          auth method: basic|pat|oauth2
       --mode string            OAuth redirect handling: auto|local|oob (default "auto")
+      --port int               loopback port for the OAuth redirect — must match the callback URL registered on the app (default 8990)
       --scopes string          OAuth scopes to request (default "read:jira-work write:jira-work read:jira-user read:confluence-content.all write:confluence-content offline_access")
       --token string           API token or personal access token (prompted if omitted)
 ```
