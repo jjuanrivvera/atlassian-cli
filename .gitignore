@@ -10,3 +10,4 @@ specs/
 *.tmp
 .DS_Store
 completions/
+dist/

@@ -30,7 +30,7 @@ func main() {
 
 // generate writes the command reference and returns the page count.
 func generate(out string) (int, error) {
-	if err := os.MkdirAll(out, 0o750); err != nil {
+	if err := os.MkdirAll(out, 0o750); err != nil { // #nosec G703 -- output dir named by the operator
 		return 0, err
 	}
 
@@ -61,12 +61,12 @@ func fixLinks(dir string) (int, error) {
 			continue
 		}
 		path := filepath.Join(dir, e.Name())
-		raw, err := os.ReadFile(path) // #nosec G304 -- the generator reads its own output
+		raw, err := os.ReadFile(path) // #nosec G304,G703 -- the generator reads back its own output
 		if err != nil {
 			return count, err
 		}
 		fixed := strings.ReplaceAll(string(raw), ".md)", ")")
-		if err := os.WriteFile(path, []byte(fixed), 0o600); err != nil {
+		if err := os.WriteFile(path, []byte(fixed), 0o600); err != nil { // #nosec G703 -- rewrites the file it just generated
 			return count, err
 		}
 		count++

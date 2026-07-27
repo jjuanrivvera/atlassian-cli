@@ -4,6 +4,8 @@
 # CI without an agent: set CLIWRIGHT_SKIP_JUDGE=1 to bypass *intentionally* (logs a warning;
 # it never silently passes).
 set -uo pipefail
+# Interpolated into the rubric prompt below, not used by the shell itself.
+# shellcheck disable=SC2034
 THRESHOLD="${CLIWRIGHT_JUDGE_MIN:-3}"
 
 if [[ "${CLIWRIGHT_SKIP_JUDGE:-0}" == "1" ]]; then

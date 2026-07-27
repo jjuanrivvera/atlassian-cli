@@ -4,6 +4,10 @@ project_name: atlassian-cli
 before:
   hooks:
     - go mod tidy
+    # Generated here rather than in the workflow, so `goreleaser release` works the same way
+    # whoever invokes it — the nfpms contents below reference these files, and a missing one
+    # fails the whole build at packaging time.
+    - ./scripts/completions.sh
 
 builds:
   - id: atlassian

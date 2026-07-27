@@ -257,16 +257,16 @@ func writeGuardFiles(cmd *cobra.Command, o *globalOptions, dir string, files []g
 		if dir != "" {
 			path = filepath.Join(dir, filepath.Base(f.Path))
 		}
-		if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+		if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil { // #nosec G703 -- --dir is named by the operator
 			return fmt.Errorf("create %s: %w", filepath.Dir(path), err)
 		}
 		if _, err := os.Stat(path); err == nil {
 			backup := path + ".bak"
-			existing, err := os.ReadFile(path) // #nosec G304 -- path is derived from the host layout
+			existing, err := os.ReadFile(path) // #nosec G304,G703 -- path is the host config location
 			if err != nil {
 				return fmt.Errorf("read existing %s: %w", path, err)
 			}
-			if err := os.WriteFile(backup, existing, 0o600); err != nil {
+			if err := os.WriteFile(backup, existing, 0o600); err != nil { // #nosec G703 -- backup beside the file being replaced
 				return fmt.Errorf("back up %s: %w", path, err)
 			}
 			o.note(cmd.ErrOrStderr(), "existing %s backed up to %s", path, backup)
@@ -276,7 +276,7 @@ func writeGuardFiles(cmd *cobra.Command, o *globalOptions, dir string, files []g
 		if strings.HasSuffix(path, ".sh") {
 			mode = 0o700 // the hook has to be executable for the host to run it
 		}
-		if err := os.WriteFile(path, []byte(f.Content), mode); err != nil {
+		if err := os.WriteFile(path, []byte(f.Content), mode); err != nil { // #nosec G703 -- host config path
 			return fmt.Errorf("write %s: %w", path, err)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "wrote %s\n", path)

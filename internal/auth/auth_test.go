@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -220,7 +221,7 @@ func TestFileStore_RoundTrip(t *testing.T) {
 
 	info, err := os.Stat(path)
 	require.NoError(t, err)
-	if os.Getenv("GOOS") != "windows" {
+	if runtime.GOOS != "windows" {
 		assert.Equal(t, os.FileMode(0o600), info.Mode().Perm())
 	}
 

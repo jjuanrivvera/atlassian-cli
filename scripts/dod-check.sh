@@ -9,6 +9,9 @@ fail=0
 ok()   { printf "  ✓ %s\n" "$1"; }
 bad()  { printf "  ✗ %s\n" "$1"; fail=1; }
 # have <description> <test-command...>
+# The eval is deliberate: each check is written as a shell command *string* (with pipes,
+# negation and globs), which is what makes the checks below readable one-liners.
+# shellcheck disable=SC2294
 have() { if eval "${@:2}" >/dev/null 2>&1; then ok "$1"; else bad "$1"; fi; }
 
 echo "Definition-of-Done checks for '$BIN':"

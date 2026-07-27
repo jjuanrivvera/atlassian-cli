@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -592,7 +593,7 @@ func TestAgentGuard_WriteInstallsFiles(t *testing.T) {
 	hook := filepath.Join(dir, "atlassian-guard.sh")
 	info, err := os.Stat(hook)
 	require.NoError(t, err)
-	if os.Getenv("GOOS") != "windows" {
+	if runtime.GOOS != "windows" {
 		assert.NotZero(t, info.Mode().Perm()&0o100, "the host must be able to execute the hook")
 	}
 }
