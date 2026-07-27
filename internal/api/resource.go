@@ -81,8 +81,9 @@ type ListParams struct {
 	Query url.Values
 }
 
-// Page is one page of results plus the handle for the next.
-type Page[T any] struct {
+// ResultPage is one page of results plus the handle for the next. Named to avoid colliding
+// with Confluence's Page content type.
+type ResultPage[T any] struct {
 	Items []T
 	Next  string
 	Total int
@@ -90,29 +91,29 @@ type Page[T any] struct {
 }
 
 // List fetches a single page.
-func (r *Resource[T]) List(ctx context.Context, p ListParams) (Page[T], error) {
+func (r *Resource[T]) List(ctx context.Context, p ListParams) (ResultPage[T], error) {
 	q := mergeQuery(r.style.pageParams(p.Limit, p.Cursor), p.Query)
 
 	body, err := r.client.Do(ctx, Request{
 		Product: r.product, Method: http.MethodGet, Path: r.path, Query: q,
 	})
 	if err != nil {
-		return Page[T]{}, err
+		return ResultPage[T]{}, err
 	}
 	// A dry run performs no request, so there is nothing to decode.
 	if body == nil {
-		return Page[T]{Last: true}, nil
+		return ResultPage[T]{Last: true}, nil
 	}
 
 	pg, err := decodePage(body, r.style, p.Cursor, p.Limit)
 	if err != nil {
-		return Page[T]{}, fmt.Errorf("%s: %w", r.path, err)
+		return ResultPage[T]{}, fmt.Errorf("%s: %w", r.path, err)
 	}
 	items, err := decodeItems[T](pg.items)
 	if err != nil {
-		return Page[T]{}, fmt.Errorf("%s: %w", r.path, err)
+		return ResultPage[T]{}, fmt.Errorf("%s: %w", r.path, err)
 	}
-	return Page[T]{Items: items, Next: pg.next, Total: pg.total, Last: pg.isLast}, nil
+	return ResultPage[T]{Items: items, Next: pg.next, Total: pg.total, Last: pg.isLast}, nil
 }
 
 // ListAll walks every page until the collection is exhausted, the limit is reached, or the
