@@ -210,3 +210,23 @@ func TestDefaultOAuthScopesIncludeOfflineAccess(t *testing.T) {
 
 // newLocalListener binds a loopback port for the callback-server tests.
 func newLocalListener() (net.Listener, error) { return net.Listen("tcp", "127.0.0.1:0") }
+
+func TestOAuthRedirectURIIsStable(t *testing.T) {
+	// Atlassian matches redirect_uri against the app's registered callback URL exactly and
+	// supports no wildcard or variable port. An ephemeral port would therefore produce a
+	// different redirect_uri on every run and be rejected every time, so the port must be
+	// fixed and knowable in advance.
+	assert.Equal(t, 8990, DefaultOAuthPort)
+
+	root := NewRootCmd()
+	login, _, err := root.Find([]string{"auth", "login"})
+	require.NoError(t, err)
+
+	portFlag := login.Flags().Lookup("port")
+	require.NotNil(t, portFlag, "--port must exist so a busy default can be moved")
+	assert.Equal(t, "8990", portFlag.DefValue)
+
+	// The help must state the exact URL to register; the flow fails confusingly otherwise.
+	assert.Contains(t, login.Long, "http://127.0.0.1:8990/callback")
+	assert.Contains(t, login.Long, "developer.atlassian.com/console/myapps")
+}

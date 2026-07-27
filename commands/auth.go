@@ -56,6 +56,7 @@ func newAuthLoginCmd(o *globalOptions) *cobra.Command {
 		secret   string
 		mode     string
 		scopes   string
+		port     int
 	)
 
 	cmd := &cobra.Command{
@@ -65,7 +66,16 @@ func newAuthLoginCmd(o *globalOptions) *cobra.Command {
 Capture a credential, store it in the OS keyring, and verify it against the API before
 saving — so a typo fails here rather than on the next command.
 
-The token is read without echoing when the terminal is interactive; pass --token to script it.`),
+The token is read without echoing when the terminal is interactive; pass --token to script it.
+
+OAuth needs an app registered at https://developer.atlassian.com/console/myapps/ with its
+callback URL set to exactly:
+
+    http://127.0.0.1:8990/callback
+
+Atlassian matches that URL exactly and supports no wildcard port, which is why the port is
+fixed rather than chosen per run. Use --port if something else already holds it (and register
+the matching URL), or --mode oob to paste the code by hand on a machine with no browser.`),
 		Example: strings.TrimSpace(`
   atlassian auth login                                   # Cloud: email + API token
   atlassian auth login --method pat                      # Data Center: personal access token
@@ -149,7 +159,7 @@ The token is read without echoing when the terminal is interactive; pass --token
 					}
 				}
 				tok, err := runOAuthFlow(cmd, oauthParams{
-					ClientID: clientID, ClientSecret: secret, Mode: mode, Scopes: scopes,
+					ClientID: clientID, ClientSecret: secret, Mode: mode, Scopes: scopes, Port: port,
 				})
 				if err != nil {
 					return err
@@ -206,6 +216,8 @@ The token is read without echoing when the terminal is interactive; pass --token
 	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id")
 	cmd.Flags().StringVar(&secret, "client-secret", "", "OAuth client secret")
 	cmd.Flags().StringVar(&mode, "mode", "auto", "OAuth redirect handling: auto|local|oob")
+	cmd.Flags().IntVar(&port, "port", DefaultOAuthPort,
+		"loopback port for the OAuth redirect — must match the callback URL registered on the app")
 	cmd.Flags().StringVar(&scopes, "scopes", defaultOAuthScopes, "OAuth scopes to request")
 	annotate(cmd, kindWrite)
 	cmd.Annotations["atlassianLocal"] = "true"
@@ -363,6 +375,10 @@ func resolveCloudID(ctx context.Context, accessToken, baseURL string) (string, e
 // defaultOAuthScopes covers read and write across Jira and Confluence, plus offline_access
 // for the refresh token — without offline_access the grant expires in an hour and every
 // subsequent command would fail.
+// DefaultOAuthPort is the loopback port the redirect listener binds by default. It is fixed
+// because it forms part of the redirect_uri registered on the Atlassian app.
+const DefaultOAuthPort = 8990
+
 const defaultOAuthScopes = "read:jira-work write:jira-work read:jira-user " +
 	"read:confluence-content.all write:confluence-content offline_access"
 
@@ -371,6 +387,9 @@ type oauthParams struct {
 	ClientSecret string
 	Mode         string
 	Scopes       string
+	// Port is the loopback port the redirect listener binds. It is part of the redirect_uri
+	// the user registers on the app, so it must not vary between runs.
+	Port int
 }
 
 type oauthToken struct {
@@ -405,15 +424,20 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 		srv         *http.Server
 	)
 	if mode == "auto" || mode == "local" {
-		ln, err := net.Listen("tcp", "127.0.0.1:0")
+		// A FIXED port, deliberately. Atlassian matches redirect_uri against the callback URL
+		// registered on the app, exactly, and supports no wildcard or variable port. An
+		// ephemeral port would therefore produce a different redirect_uri on every run and be
+		// rejected every time — so the port is stable and printed, and the user registers it
+		// once. --port moves it if something else already holds that address.
+		ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", p.Port))
 		if err != nil {
 			if mode == "local" {
-				return nil, fmt.Errorf("start local redirect listener: %w", err)
+				return nil, fmt.Errorf("cannot listen on 127.0.0.1:%d for the OAuth redirect: %w\n\npass --port to use a different one (and register that callback URL on the app), or --mode oob to paste the code instead", p.Port, err)
 			}
+			fmt.Fprintf(cmd.ErrOrStderr(), "note: 127.0.0.1:%d is unavailable, falling back to paste-the-code mode\n", p.Port)
 			mode = "oob"
 		} else {
-			port := ln.Addr().(*net.TCPAddr).Port
-			redirectURI = fmt.Sprintf("http://127.0.0.1:%d/callback", port)
+			redirectURI = fmt.Sprintf("http://127.0.0.1:%d/callback", p.Port)
 			codeCh = make(chan string, 1)
 			srv = startCallbackServer(ln, state, codeCh)
 			defer func() {
@@ -446,7 +470,9 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 		"code_challenge_method": {"S256"},
 	}.Encode()
 
-	fmt.Fprintf(cmd.ErrOrStderr(), "\nOpen this URL to authorize:\n\n  %s\n\n", authURL)
+	fmt.Fprintf(cmd.ErrOrStderr(),
+		"\nThe app's registered callback URL must be exactly:\n\n  %s\n\nOpen this URL to authorize:\n\n  %s\n\n",
+		redirectURI, authURL)
 
 	var code string
 	if mode == "local" {
