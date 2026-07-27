@@ -1,7 +1,7 @@
 ---
 name: atlassian-cli
 description: Read and write Jira, Confluence, Jira Service Management and Jira Software from the terminal with the `atlassian` CLI. Use this whenever the task involves Jira issues (searching with JQL, creating, transitioning, assigning, commenting, logging work), Confluence pages and spaces (reading, creating, editing, CQL search), sprints, boards and backlogs, or service-desk requests and queues — on Atlassian Cloud or Data Center. It covers all 1,143 documented operations, so reach for it even for endpoints without a dedicated command.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/jjuanrivvera/atlassian-cli
 license: MIT
 allowed-tools: Bash(atlassian:*)

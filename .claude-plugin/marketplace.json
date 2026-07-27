@@ -6,7 +6,7 @@
     {
       "name": "atlassian-cli",
       "source": "./",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Jira, Confluence, JSM and Agile from the command line — 1,143 operations, Cloud and Data Center",
       "homepage": "https://github.com/jjuanrivvera/atlassian-cli",
       "keywords": ["atlassian", "jira", "confluence", "jsm", "agile", "cli"]
