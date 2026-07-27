@@ -1,0 +1,11 @@
+bin/
+dist/
+coverage.out
+coverage.html
+site/
+# Atlassian's raw OpenAPI documents (~4MB) are the enumeration SOURCE, not a build input:
+# `make spec-fetch` downloads them and `make spec-gen` bakes them into the checked-in
+# internal/catalog/catalog.json.gz + api-manifest.json. Keeping them out keeps clones small.
+specs/
+*.tmp
+.DS_Store
