@@ -275,7 +275,7 @@ func newSprintStateCmd(o *globalOptions, use, state, short string) *cobra.Comman
 				return err
 			}
 			if updated == nil {
-				o.note(cmd.ErrOrStderr(), "sprint %s is now %s", args[0], state)
+				o.noteWrite(cmd.ErrOrStderr(), "sprint %s is now %s", args[0], state)
 				return nil
 			}
 			return o.render(cmd, updated, sprintColumns)
@@ -330,7 +330,7 @@ silently truncated. Use the sprint id 'backlog' to move issues out of any sprint
 					return fmt.Errorf("moved %d of %d issues before failing: %w", start, len(issues), err)
 				}
 			}
-			o.note(cmd.ErrOrStderr(), "moved %d issue(s) to %s", len(issues), args[0])
+			o.noteWrite(cmd.ErrOrStderr(), "moved %d issue(s) to %s", len(issues), args[0])
 			return nil
 		},
 	}

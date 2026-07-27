@@ -326,7 +326,7 @@ func buildUpdateCmd[T any](spec resourceSpec[T], o *globalOptions, newRes func(*
 			// Most Atlassian update endpoints answer 204 with no body; say so rather than
 			// printing nothing and leaving the user unsure whether it worked.
 			if item == nil {
-				o.note(cmd.ErrOrStderr(), "updated %s", args[0])
+				o.noteWrite(cmd.ErrOrStderr(), "updated %s", args[0])
 				return nil
 			}
 			return o.render(cmd, item, spec.Columns)
@@ -365,7 +365,7 @@ func buildDeleteCmd[T any](spec resourceSpec[T], o *globalOptions, newRes func(*
 			if err := res.Delete(cmd.Context(), args[0], nil); err != nil {
 				return err
 			}
-			o.note(cmd.ErrOrStderr(), "deleted %s", args[0])
+			o.noteWrite(cmd.ErrOrStderr(), "deleted %s", args[0])
 			return nil
 		},
 	}

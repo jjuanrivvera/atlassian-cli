@@ -154,9 +154,19 @@ func (r *Renderer) renderIDs(v any) error {
 	}
 	for _, row := range rows {
 		val := row[field]
+		// Fall back to the OTHER identifier, never the same one again: a resource whose
+		// IDField is "key" would otherwise retry "key", find nothing, and silently print an
+		// empty list — which reads identically to "no results".
 		if val == nil {
-			// Fall back to key, which is the natural identifier for Jira issues and projects.
-			val = row["key"]
+			for _, alt := range []string{"key", "id"} {
+				if alt == field {
+					continue
+				}
+				if v := row[alt]; v != nil {
+					val = v
+					break
+				}
+			}
 		}
 		if val == nil {
 			continue

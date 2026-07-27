@@ -260,7 +260,9 @@ func newPageEditCmd(o *globalOptions) *cobra.Command {
 				return err
 			}
 
-			current, err := client.PageBody(cmd.Context(), args[0], "storage")
+			// ReadThrough: Confluence requires version = current+1, so the current version has
+			// to be read even when the update itself is only being previewed.
+			current, err := client.ReadThrough().PageBody(cmd.Context(), args[0], "storage")
 			if err != nil {
 				return fmt.Errorf("read the page before updating it: %w", err)
 			}
@@ -302,7 +304,7 @@ func newPageEditCmd(o *globalOptions) *cobra.Command {
 				return err
 			}
 			if updated == nil {
-				o.note(cmd.ErrOrStderr(), "updated page %s to version %d", args[0], next)
+				o.noteWrite(cmd.ErrOrStderr(), "updated page %s to version %d", args[0], next)
 				return nil
 			}
 			return o.render(cmd, updated, pageColumns)
@@ -504,7 +506,7 @@ func escapeXML(s string) string {
 // v2 dropped keys from its write paths, but keys are what people know and what the UI shows,
 // so the lookup happens here rather than being pushed onto the user.
 func resolveSpaceID(cmd *cobra.Command, client *api.Client, key string) (string, error) {
-	page, err := client.Spaces().List(cmd.Context(), api.ListParams{
+	page, err := client.ReadThrough().Spaces().List(cmd.Context(), api.ListParams{
 		Limit: 2, Query: urlValues("keys", key),
 	})
 	if err != nil {
