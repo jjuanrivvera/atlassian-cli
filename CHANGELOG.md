@@ -1,0 +1,44 @@
+# Changelog
+
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.1.0] - 2026-07-27
+
+First release.
+
+### Added
+
+- **Complete API coverage.** An embedded catalog of all 1,143 operations Atlassian documents,
+  generated from its own OpenAPI files: Jira Cloud platform v3 (616), Confluence Cloud v2
+  (218), Confluence Cloud v1 (130), Jira Software / Agile (105) and Jira Service Management
+  (74). `atlassian op search|list|describe|call` reaches every one of them, validating
+  parameters against the embedded schema before sending anything.
+- **Curated commands** for everyday work: issues (JQL search, transitions, assignment,
+  comments, worklogs), projects, users, filters, dashboards, fields, versions, components,
+  issue types, statuses, priorities, resolutions, groups; boards, sprints, epics and backlog;
+  service desks, requests, organizations and queues; pages, spaces, blog posts, comments,
+  attachments, whiteboards, folders and custom content.
+- **Markdown instead of ADF.** Rich-text fields accept text or Markdown and are converted to
+  Atlassian Document Format; ADF is rendered back to readable text on the way out.
+- **Confluence version handling.** `pages edit` reads the current version and increments it,
+  and resends the existing body on a title-only edit.
+- **Name resolution.** `--assignee` accepts a display name, an email or `me` and resolves it
+  to the accountId Jira's write endpoints require.
+- **Cross-product search.** `atlassian search` queries Jira and Confluence concurrently and
+  normalizes the hits into one table, degrading gracefully when one product is unlicensed.
+- **Three auth methods**: Cloud API token, Data Center personal access token, and OAuth 2.0
+  (3LO) with PKCE and automatic refresh. Credentials in the OS keyring, with an AES-256-GCM
+  encrypted-file fallback for headless hosts.
+- **Multi-site**, selected per command with `--site` (`--profile` kept as a hidden alias).
+- **Agent surface**: an `mcp` server exposing the tree as annotated MCP tools, and
+  `agent guard` generating host safety config from the live command tree.
+- Output as table, JSON, YAML, CSV or bare ids, with `--jq`, `--columns`, CSV
+  formula-injection neutralization and terminal-escape sanitization.
+- `--dry-run` printing the equivalent curl with the credential redacted.
+
+[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jjuanrivvera/atlassian-cli/releases/tag/v0.1.0

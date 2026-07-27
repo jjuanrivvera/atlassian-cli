@@ -572,7 +572,7 @@ func newIssueCommentsCmd(o *globalOptions) *cobra.Command {
 				}
 				// ADF is unreadable in a table; render it unless the caller wants the raw JSON.
 				if raw {
-					row["body"] = json.RawMessage(c.Body)
+					row["body"] = c.Body
 				} else {
 					row["body"] = adf.RenderJSON(c.Body)
 				}

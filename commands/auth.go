@@ -417,7 +417,11 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 			codeCh = make(chan string, 1)
 			srv = startCallbackServer(ln, state, codeCh)
 			defer func() {
-				shutdownCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+				// WithoutCancel, not Background: the command context is very likely already
+				// cancelled by the time this runs (the user pressed Ctrl-C, or the flow
+				// finished), and a cancelled context would abort the graceful shutdown
+				// immediately. Deriving from it keeps any values while detaching the deadline.
+				shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(cmd.Context()), 2*time.Second)
 				defer cancel()
 				_ = srv.Shutdown(shutdownCtx)
 			}()

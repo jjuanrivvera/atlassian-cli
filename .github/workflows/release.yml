@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write   # required for cosign keyless signing
+
+jobs:
+  release:
+    # Skip pre-release tags (v1.2.3-rc1): they are for testing the pipeline, not publishing.
+    if: ${{ !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with: {fetch-depth: 0}
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - uses: sigstore/cosign-installer@v3
+      - uses: anchore/sbom-action/download-syft@v0
+      - name: shell completions
+        run: |
+          go build -o bin/atlassian ./cmd/atlassian
+          ./scripts/completions.sh
+      - uses: goreleaser/goreleaser-action@v6
+        with: {version: latest, args: release --clean}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # A repo-scoped PAT: the default GITHUB_TOKEN cannot push to the tap repos.
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: fast-forward main to the released commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git push origin HEAD:main

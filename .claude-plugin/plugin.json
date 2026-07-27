@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "atlassian-cli",
+  "version": "0.1.0",
+  "description": "Drive Jira, Confluence, Jira Service Management and Jira Software from the command line — all 1,143 documented operations, on Cloud and Data Center",
+  "author": { "name": "Juan Rivera", "url": "https://github.com/jjuanrivvera" },
+  "homepage": "https://github.com/jjuanrivvera/atlassian-cli",
+  "repository": "https://github.com/jjuanrivvera/atlassian-cli",
+  "license": "MIT",
+  "skills": "./skills",
+  "keywords": ["atlassian", "jira", "confluence", "jsm", "agile", "cli", "ai-agent"]
+}

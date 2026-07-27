@@ -145,7 +145,7 @@ query yourself instead, and --jira/--confluence to search only one product.`),
 			// is common, and a 403 from Confluence should degrade rather than fail the search.
 			switch {
 			case jiraErr != nil && confErr != nil:
-				return fmt.Errorf("both searches failed:\n  jira: %v\n  confluence: %v", jiraErr, confErr)
+				return fmt.Errorf("both searches failed:\n  jira: %w\n  confluence: %w", jiraErr, confErr)
 			case jiraErr != nil:
 				o.note(cmd.ErrOrStderr(), "Jira search failed, showing Confluence results only: %v", jiraErr)
 			case confErr != nil:

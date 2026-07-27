@@ -1,0 +1,41 @@
+site_name: atlassian
+site_description: Jira, Confluence, Jira Service Management and Jira Software from the command line
+site_url: https://jjuanrivvera.github.io/atlassian-cli/
+repo_url: https://github.com/jjuanrivvera/atlassian-cli
+repo_name: jjuanrivvera/atlassian-cli
+edit_uri: ""
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle: {icon: material/brightness-7, name: Switch to dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle: {icon: material/brightness-4, name: Switch to light mode}
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight: {anchor_linenums: true}
+
+nav:
+  - Home: index.md
+  - Comparison: comparison.md
+  - Command reference: commands/atlassian.md
+
+plugins:
+  - search

@@ -29,7 +29,10 @@ done
 # Resilience & safety
 have "--dry-run prints equivalent curl"  "rg -lq 'dry-run' . && rg -lq 'curl' internal/api"
 have "Ctrl-C: signal.NotifyContext"      "rg -lq 'signal.NotifyContext' cmd"
-have "no stray context.Background()"     "! rg -lq 'context.Background()' commands internal/api"
+# A stray context.Background() in production code silently breaks Ctrl-C cancellation.
+# Tests are excluded because a test has no cobra command to inherit a context from — the
+# adjacent fmt.Scan* check already excludes them for the same reason.
+have "no stray context.Background()"     "! rg -lq --glob '!*_test.go' 'context.Background()' commands internal/api"
 have "secrets in OS keyring"             "rg -q 'zalando/go-keyring' go.mod"
 # Interactive secret input must be hidden. fmt.Scan/Scanln/Scanf echo the secret to the
 # terminal and stall on long pastes — read via promptSecret (term.ReadPassword) instead.

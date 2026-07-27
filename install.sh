@@ -1,20 +1,20 @@
 #!/bin/sh
-# __BINARY__ installer for macOS and Linux.
+# atlassian installer for macOS and Linux.
 #
-#   curl -fsSL https://raw.githubusercontent.com/__OWNER__/__REPO__/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/jjuanrivvera/atlassian-cli/main/install.sh | sh
 #
 # Downloads the release archive matching your OS/arch, verifies its SHA-256 against the
 # release checksums.txt, and installs the binary. Configure via env vars:
-#   __BINARY_UPPER___VERSION=v1.2.3   pin a version (default: the latest release)
+#   ATLASSIAN_VERSION=v1.2.3   pin a version (default: the latest release)
 #   INSTALL_DIR=/usr/local/bin        install location (default; falls back to ~/.local/bin)
 #
 # Windows: use Scoop (see the README). This installer is for macOS and Linux.
 set -eu
 
 # --- per-tool configuration (the only lines cliwright templates per CLI) ---
-REPO="__OWNER__/__REPO__"
-BINARY="__BINARY__"
-VERSION="${__BINARY_UPPER___VERSION:-}"
+REPO="jjuanrivvera/atlassian-cli"
+BINARY="atlassian"
+VERSION="${ATLASSIAN_VERSION:-}"
 
 die() { printf 'error: %s\n' "$1" >&2; exit 1; }
 
@@ -41,7 +41,7 @@ esac
 if [ -z "$VERSION" ]; then
   VERSION="$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
     | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name" *: *"([^"]+)".*/\1/')"
-  [ -n "$VERSION" ] || die "could not determine the latest release; set __BINARY_UPPER___VERSION"
+  [ -n "$VERSION" ] || die "could not determine the latest release; set ATLASSIAN_VERSION"
 fi
 
 base="https://github.com/${REPO}/releases/download/${VERSION}"

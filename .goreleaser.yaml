@@ -1,77 +1,137 @@
-# .goreleaser.yaml — copied into a generated CLI by cliwright (GOAL.md §5).
-# Replace __BINARY__ / __OWNER__ / __REPO__. Run `goreleaser check` in CI (not only at tag).
 version: 2
+project_name: atlassian-cli
 
 before:
-  hooks: [go mod tidy, ./scripts/completions.sh]
+  hooks:
+    - go mod tidy
 
 builds:
-  - id: __BINARY__
-    main: ./cmd/__BINARY__
-    binary: __BINARY__
+  - id: atlassian
+    main: ./cmd/atlassian
+    binary: atlassian
     env: [CGO_ENABLED=0]
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
     ignore:
-      - { goos: windows, goarch: arm64 }
+      - goos: windows
+        goarch: arm64
     ldflags:
       - -s -w
-      - -X {{ .ModulePath }}/internal/version.Version={{ .Version }}
-      - -X {{ .ModulePath }}/internal/version.Commit={{ .Commit }}
-      - -X {{ .ModulePath }}/internal/version.Date={{ .Date }}
+      - -X github.com/jjuanrivvera/atlassian-cli/internal/version.Version={{.Version}}
+      - -X github.com/jjuanrivvera/atlassian-cli/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/jjuanrivvera/atlassian-cli/internal/version.Date={{.Date}}
 
 archives:
-  - formats: [tar.gz]
+  - id: atlassian
+    ids: [atlassian]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
     format_overrides:
-      - { goos: windows, formats: [zip] }
-    files: [README.md, LICENSE, completions/*]
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+      - completions/*
 
-checksum: { name_template: checksums.txt }
+checksum:
+  name_template: checksums.txt
 
-# An explicit release block — without it, `goreleaser check` errors on a fresh repo
-# ("scm releases: no remote configured to list refs from").
-release:
-  github: { owner: __OWNER__, name: __REPO__ }
-  prerelease: auto
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
 
-# Homebrew: use homebrew_casks (NOT the deprecated brews:). The cask is __BINARY__-cli,
-# but the binary inside the archive is __BINARY__ — so `binaries:` (plural list) is required,
-# and an unsigned arm64 binary is SIGKILL'd by Gatekeeper without the xattr postflight.
+changelog:
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Performance
+      regexp: '^.*?perf(\(.+\))??!?:.+$'
+      order: 2
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+
+# Homebrew CASK, not the deprecated `brews:`. `binaries:` is required because the cask is
+# named atlassian-cli while the binary inside the archive is `atlassian` — without it the
+# symlink points at the wrong name and `brew install` cannot find the command.
 homebrew_casks:
-  - name: __BINARY__-cli
-    binaries: [__BINARY__]
-    repository: { owner: __OWNER__, name: homebrew-__REPO__ }
-    homepage: https://github.com/__OWNER__/__REPO__
+  - name: atlassian-cli
+    binaries: [atlassian]
+    repository:
+      owner: jjuanrivvera
+      name: homebrew-atlassian-cli
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/jjuanrivvera/atlassian-cli
+    description: Jira, Confluence, JSM and Agile from the command line
+    license: MIT
     hooks:
       post:
         install: |
-          system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/__BINARY__"]
+          # An unsigned binary is SIGKILLed by Gatekeeper on macOS arm64 unless the
+          # quarantine attribute is stripped.
+          system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/atlassian"]
 
 scoops:
-  - repository: { owner: __OWNER__, name: scoop-__REPO__ }   # this bucket repo must already exist
+  - name: atlassian-cli
+    repository:
+      owner: jjuanrivvera
+      name: scoop-atlassian-cli
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/jjuanrivvera/atlassian-cli
+    description: Jira, Confluence, JSM and Agile from the command line
+    license: MIT
 
 nfpms:
-  - formats: [deb, rpm, apk]
+  - id: packages
+    ids: [atlassian]
+    package_name: atlassian-cli
+    vendor: jjuanrivvera
+    homepage: https://github.com/jjuanrivvera/atlassian-cli
+    maintainer: Juan Rivera <jjuanrivvera@gmail.com>
+    description: Jira, Confluence, Jira Service Management and Jira Software from the command line
+    license: MIT
+    formats: [deb, rpm, apk]
     bindir: /usr/bin
-    maintainer: __OWNER__
     contents:
-      - { src: completions/__BINARY__.bash, dst: /usr/share/bash-completion/completions/__BINARY__ }
-      - { src: completions/__BINARY__.zsh,  dst: /usr/share/zsh/site-functions/___BINARY__ }
-      - { src: completions/__BINARY__.fish, dst: /usr/share/fish/vendor_completions.d/__BINARY__.fish }
+      - src: ./completions/atlassian.bash
+        dst: /usr/share/bash-completion/completions/atlassian
+        file_info: {mode: 0644}
+      - src: ./completions/atlassian.zsh
+        dst: /usr/share/zsh/site-functions/_atlassian
+        file_info: {mode: 0644}
+      - src: ./completions/atlassian.fish
+        dst: /usr/share/fish/vendor_completions.d/atlassian.fish
+        file_info: {mode: 0644}
 
 sboms:
-  - artifacts: archive          # syft SBOMs
+  - artifacts: archive
 
-signs:                          # cosign keyless (needs CI OIDC: permissions id-token: write)
+signs:
   - cmd: cosign
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--output-certificate=${certificate}"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes"
     artifacts: checksum
     output: true
-    args: ["sign-blob", "--yes", "--output-signature=${signature}", "--output-certificate=${certificate}", "${artifact}"]
 
-changelog:
-  groups:
-    - { title: Features, regexp: '^.*?feat(\(.+\))??!?:.+$', order: 0 }
-    - { title: Fixes, regexp: '^.*?fix(\(.+\))??!?:.+$', order: 1 }
-    - { title: Performance, regexp: '^.*?perf(\(.+\))??!?:.+$', order: 2 }
-  filters:
-    exclude: ['^docs:', '^test:', '^chore:', '^ci:', merge conflict, Merge pull request, Merge branch]
+release:
+  draft: false
+  prerelease: auto
+  footer: |
+    ---
+    Install: `curl -fsSL https://raw.githubusercontent.com/jjuanrivvera/atlassian-cli/main/install.sh | sh`
