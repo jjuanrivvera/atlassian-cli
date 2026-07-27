@@ -16,9 +16,9 @@ jobs:
     if: ${{ !contains(github.ref_name, '-') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with: {fetch-depth: 0}
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - uses: sigstore/cosign-installer@v3
@@ -27,7 +27,7 @@ jobs:
         run: |
           go build -o bin/atlassian ./cmd/atlassian
           ./scripts/completions.sh
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@v7
         with: {version: latest, args: release --clean}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
