@@ -73,8 +73,14 @@ func (e *APIError) Hint() string {
 		return "server error, usually transient — retry, then check https://status.atlassian.com"
 	}
 	if e.StatusCode == http.StatusBadRequest {
-		// A 400 mentioning ADF is nearly always a plain string sent where rich text is required.
-		if strings.Contains(strings.ToLower(e.Body), "atlassiandocument") || strings.Contains(strings.ToLower(e.Message), "adf") {
+		// A 400 mentioning ADF is nearly always a plain string sent where rich text is
+		// required. Jira spells this several ways depending on the endpoint — "Operation
+		// value must be an Atlassian Document", "atlassianDocument", "ADF" — so match all of
+		// them rather than the one spelling that happened to be seen first.
+		haystack := strings.ToLower(e.Body + " " + e.Message)
+		if strings.Contains(haystack, "atlassiandocument") ||
+			strings.Contains(haystack, "atlassian document") ||
+			strings.Contains(haystack, "adf") {
 			return "Jira v3 expects Atlassian Document Format for rich-text fields — pass text/Markdown and let the CLI convert it, or supply raw ADF with the `-adf` variant of the flag"
 		}
 		return "the request was malformed — check required parameters with `atlassian op describe <operationId>`"

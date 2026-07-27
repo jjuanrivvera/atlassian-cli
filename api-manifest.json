@@ -1,6 +1,6 @@
 {
   "api": "Atlassian Cloud \u0026 Data Center (Jira, Jira Software, Jira Service Management, Confluence)",
-  "api_method_source": "Atlassian's own published OpenAPI documents, parsed by tools/genspec (see DECISIONS.md #1): jira-platform.json (The Jira Cloud platform REST API v1001.0.0-SNAPSHOT-f37a74f776196442c72678fccdddc78eac807782): 616 ops; jira-software.json (Jira Software Cloud API v1001.0.0): 105 ops; jira-servicedesk.json (Service Management Public REST API v1001.0.0-SNAPSHOT-f37a74f776196442c72678fccdddc78eac807782): 74 ops; confluence-v2.json (The Confluence Cloud REST API v2 v2.0.0): 218 ops; confluence-v1.json (The Confluence Cloud REST API v1.0.0): 130 ops",
+  "api_method_source": "Atlassian's own published OpenAPI documents, parsed by tools/genspec (see DECISIONS.md #1): https://developer.atlassian.com/cloud/jira/platform/swagger-v3.v3.json → jira-platform.json (\"The Jira Cloud platform REST API\") sha256:cdcd6b4d50a404f0 = 616 ops; https://developer.atlassian.com/cloud/jira/software/swagger.v3.json → jira-software.json (\"Jira Software Cloud API\") sha256:4e108d54b9906447 = 105 ops; https://developer.atlassian.com/cloud/jira/service-desk/swagger.v3.json → jira-servicedesk.json (\"Service Management Public REST API\") sha256:0963d62bae841d07 = 74 ops; https://developer.atlassian.com/cloud/confluence/openapi-v2.v3.json → confluence-v2.json (\"The Confluence Cloud REST API v2\") sha256:c4bd1ed570f21cd6 = 218 ops; https://developer.atlassian.com/cloud/confluence/swagger.v3.json → confluence-v1.json (\"The Confluence Cloud REST API\") sha256:70088490f4069e0a = 130 ops",
   "api_method_total": 1143,
   "binary": "atlassian",
   "docs_url": "https://developer.atlassian.com/cloud/",
@@ -21,7 +21,6 @@
     "addActorUsers",
     "addAtlassianTeam",
     "addAttachment",
-    "addComment",
     "addContentWatcher",
     "addCustomContentPermissions",
     "addCustomers",
@@ -51,7 +50,6 @@
     "addUsersToOrganization",
     "addVote",
     "addWatcher",
-    "addWorklog",
     "agile.getConfiguration",
     "agile.getIssue",
     "analyseExpression",
@@ -63,7 +61,6 @@
     "archivePlan",
     "archiveProject",
     "assignFieldConfigurationSchemeToProject",
-    "assignIssue",
     "assignIssueTypeSchemeToProject",
     "assignIssueTypeScreenSchemeToProject",
     "assignPermissionScheme",
@@ -118,38 +115,26 @@
     "createAttachment",
     "createAttachmentProperty",
     "createAuditRecord",
-    "createBlogPost",
     "createBlogpostProperty",
-    "createBoard",
     "createBulkUserLookup",
     "createCommentProperty",
     "createCommentWithAttachment",
-    "createComponent",
     "createContentTemplate",
-    "createCustomContent",
     "createCustomContentProperty",
     "createCustomField",
     "createCustomFieldContext",
     "createCustomFieldOption",
     "createCustomer",
-    "createCustomerRequest",
-    "createDashboard",
     "createDatabase",
     "createDatabaseProperty",
     "createFieldAssociationScheme",
     "createFieldConfiguration",
     "createFieldConfigurationScheme",
-    "createFilter",
-    "createFolder",
     "createFolderProperty",
-    "createFooterComment",
-    "createGroup",
     "createInlineComment",
-    "createIssue",
     "createIssueFieldOption",
     "createIssueLinkType",
     "createIssueSecurityScheme",
-    "createIssueType",
     "createIssueTypeAvatar",
     "createIssueTypeScheme",
     "createIssueTypeScreenScheme",
@@ -157,8 +142,6 @@
     "createNotificationScheme",
     "createOrUpdateAttachments",
     "createOrUpdateRemoteIssueLink",
-    "createOrganization",
-    "createPage",
     "createPageProperty",
     "createPermissionGrant",
     "createPermissionScheme",
@@ -167,7 +150,6 @@
     "createPriority",
     "createPriorityScheme",
     "createPrivateSpace",
-    "createProject",
     "createProjectAvatar",
     "createProjectCategory",
     "createProjectRole",
@@ -181,28 +163,21 @@
     "createScreenScheme",
     "createSmartLink",
     "createSmartLinkProperty",
-    "createSpace",
     "createSpaceProperty",
     "createSpaceRole",
-    "createSprint",
     "createStatuses",
     "createUiModification",
     "createUser",
     "createUserProperty",
-    "createVersion",
-    "createWhiteboard",
     "createWhiteboardProperty",
     "createWorkflowScheme",
     "createWorkflowSchemeDraftFromParent",
     "createWorkflows",
     "deleteActor",
     "deleteAndReplaceVersion",
-    "deleteAttachment",
     "deleteAttachmentPropertyById",
     "deleteAvatar",
-    "deleteBlogPost",
     "deleteBlogpostPropertyById",
-    "deleteBoard",
     "deleteBoardProperty",
     "deleteBuildByKey",
     "deleteBuildsByProperty",
@@ -210,16 +185,13 @@
     "deleteComment",
     "deleteCommentProperty",
     "deleteCommentPropertyById",
-    "deleteComponent",
     "deleteComponentById",
     "deleteComponentsByProperty",
     "deleteContentVersion",
-    "deleteCustomContent",
     "deleteCustomContentPropertyById",
     "deleteCustomField",
     "deleteCustomFieldContext",
     "deleteCustomFieldOption",
-    "deleteDashboard",
     "deleteDashboardItemProperty",
     "deleteDatabase",
     "deleteDatabasePropertyById",
@@ -237,28 +209,21 @@
     "deleteFieldAssociationScheme",
     "deleteFieldConfiguration",
     "deleteFieldConfigurationScheme",
-    "deleteFilter",
-    "deleteFolder",
     "deleteFolderPropertyById",
-    "deleteFooterComment",
     "deleteForgeAppProperty",
     "deleteInactiveWorkflow",
     "deleteIncidentById",
     "deleteInlineComment",
-    "deleteIssue",
     "deleteIssueFieldOption",
     "deleteIssueLink",
     "deleteIssueLinkType",
     "deleteIssueProperty",
-    "deleteIssueType",
     "deleteIssueTypeProperty",
     "deleteIssueTypeScheme",
     "deleteIssueTypeScreenScheme",
     "deleteLabelFromSpace",
     "deleteLinkedWorkspaces",
     "deleteNotificationScheme",
-    "deleteOrganization",
-    "deletePage",
     "deletePagePropertyById",
     "deletePageTree",
     "deletePermissionScheme",
@@ -266,7 +231,6 @@
     "deletePlanOnlyTeam",
     "deletePriority",
     "deletePriorityScheme",
-    "deleteProject",
     "deleteProjectAsynchronously",
     "deleteProjectAvatar",
     "deleteProjectProperty",
@@ -295,15 +259,12 @@
     "deleteSpaceDefaultClassificationLevel",
     "deleteSpacePropertyById",
     "deleteSpaceRole",
-    "deleteSprint",
     "deleteStatusesById",
     "deleteUiModification",
     "deleteUserProperty",
-    "deleteVersion",
     "deleteVulnerabilitiesByProperty",
     "deleteVulnerabilityById",
     "deleteWebhookById",
-    "deleteWhiteboard",
     "deleteWhiteboardPropertyById",
     "deleteWorkflowMapping",
     "deleteWorkflowScheme",
@@ -315,10 +276,8 @@
     "deleteWorklogProperty",
     "deleteWorkspaces",
     "disableAdminKey",
-    "doTransition",
     "downloadAttatchment",
     "duplicatePlan",
-    "editIssue",
     "editTemplate",
     "enableAdminKey",
     "estimateIssueForBoard",
@@ -332,11 +291,9 @@
     "findAssignableUsers",
     "findBulkAssignableUsers",
     "findComponentsForProjects",
-    "findGroups",
     "findSourcesForTarget",
     "findTargetFromSource",
     "findUserKeysByQuery",
-    "findUsers",
     "findUsersAndGroups",
     "findUsersByQuery",
     "findUsersForPicker",
@@ -350,8 +307,6 @@
     "getAllAccessibleProjectTypes",
     "getAllApplicationRoles",
     "getAllAvailableDashboardGadgets",
-    "getAllBoards",
-    "getAllDashboards",
     "getAllFieldConfigurationSchemes",
     "getAllFieldConfigurations",
     "getAllGadgets",
@@ -370,11 +325,9 @@
     "getAllRequestTypes",
     "getAllScreenTabFields",
     "getAllScreenTabs",
-    "getAllSprints",
     "getAllStatuses",
     "getAllSystemAvatars",
     "getAllUserDataClassificationLevels",
-    "getAllUsers",
     "getAllUsersDefault",
     "getAllVersions",
     "getAllWorkflowSchemes",
@@ -395,7 +348,6 @@
     "getAssignedPermissionScheme",
     "getAtlassianTeam",
     "getAttachment",
-    "getAttachmentById",
     "getAttachmentComments",
     "getAttachmentContent",
     "getAttachmentContentProperties",
@@ -407,7 +359,6 @@
     "getAttachmentThumbnailById",
     "getAttachmentVersionDetails",
     "getAttachmentVersions",
-    "getAttachments",
     "getAttachmentsForRequest",
     "getAuditRecords",
     "getAuditRecordsForTimePeriod",
@@ -425,7 +376,6 @@
     "getAvatarImageByType",
     "getAvatars",
     "getBanner",
-    "getBlogPostById",
     "getBlogPostClassificationLevel",
     "getBlogPostFooterComments",
     "getBlogPostInlineComments",
@@ -435,13 +385,11 @@
     "getBlogPostOperations",
     "getBlogPostVersionDetails",
     "getBlogPostVersions",
-    "getBlogPosts",
     "getBlogPostsInSpace",
     "getBlogpostAttachments",
     "getBlogpostContentProperties",
     "getBlogpostContentPropertiesById",
     "getBlueprintTemplates",
-    "getBoard",
     "getBoardByFilterId",
     "getBoardIssuesForEpic",
     "getBoardIssuesForEpicJSIS",
@@ -459,7 +407,6 @@
     "getChangeLogs",
     "getChangeLogsByIds",
     "getChildCustomContent",
-    "getChildPages",
     "getClassificationLevels",
     "getColumns",
     "getComment",
@@ -468,9 +415,7 @@
     "getCommentContentPropertiesById",
     "getCommentProperty",
     "getCommentPropertyKeys",
-    "getComments",
     "getCommentsByIds",
-    "getComponent",
     "getComponentById",
     "getComponentRelatedIssues",
     "getConfiguration",
@@ -488,10 +433,7 @@
     "getCreateIssueMeta",
     "getCreateIssueMetaIssueTypeId",
     "getCreateIssueMetaIssueTypes",
-    "getCurrentUser",
     "getCustomContentAttachments",
-    "getCustomContentById",
-    "getCustomContentByType",
     "getCustomContentByTypeInBlogPost",
     "getCustomContentByTypeInPage",
     "getCustomContentByTypeInSpace",
@@ -507,12 +449,8 @@
     "getCustomFieldContextsForProjectsAndIssueTypes",
     "getCustomFieldOption",
     "getCustomFieldsConfigurations",
-    "getCustomerRequestByIdOrKey",
     "getCustomerRequestStatus",
-    "getCustomerRequests",
     "getCustomerTransitions",
-    "getCustomers",
-    "getDashboard",
     "getDashboardItemProperty",
     "getDashboardItemPropertyKeys",
     "getDashboardsPaginated",
@@ -538,7 +476,6 @@
     "getDraftWorkflow",
     "getDynamicWebhooksForApp",
     "getEditIssueMeta",
-    "getEpic",
     "getEpics",
     "getEvents",
     "getFailedWebhooks",
@@ -555,23 +492,17 @@
     "getFieldConfigurationSchemeMappings",
     "getFieldConfigurationSchemeProjectMapping",
     "getFieldProjectAssociations",
-    "getFields",
     "getFieldsPaginated",
-    "getFilter",
-    "getFiltersPaginated",
     "getFolderAncestors",
-    "getFolderById",
     "getFolderContentProperties",
     "getFolderContentPropertiesById",
     "getFolderDescendants",
     "getFolderDirectChildren",
     "getFolderOperations",
-    "getFooterCommentById",
     "getFooterCommentChildren",
     "getFooterCommentOperations",
     "getFooterCommentVersionDetails",
     "getFooterCommentVersions",
-    "getFooterComments",
     "getFooterLikeCount",
     "getFooterLikeUsers",
     "getForgeAppProperties",
@@ -599,8 +530,6 @@
     "getInlineLikeUsers",
     "getInsightWorkspaces",
     "getIsWatchingIssueBulk",
-    "getIssue",
-    "getIssueAllTypes",
     "getIssueEstimationForBoard",
     "getIssueFieldOption",
     "getIssueLimitReport",
@@ -615,7 +544,6 @@
     "getIssueSecurityLevelMembers",
     "getIssueSecurityScheme",
     "getIssueSecuritySchemes",
-    "getIssueType",
     "getIssueTypeMappingsForContexts",
     "getIssueTypeProperty",
     "getIssueTypePropertyKeys",
@@ -627,15 +555,11 @@
     "getIssueTypesForProject",
     "getIssueWatchers",
     "getIssueWorklog",
-    "getIssuesForBacklog",
     "getIssuesForBacklogJSIS",
-    "getIssuesForBoard",
     "getIssuesForBoardJSIS",
     "getIssuesForEpic",
     "getIssuesForEpicJSIS",
-    "getIssuesForSprint",
     "getIssuesForSprintJSIS",
-    "getIssuesInQueue",
     "getIssuesWithoutEpic",
     "getIssuesWithoutEpicForBoard",
     "getIssuesWithoutEpicForBoardJSIS",
@@ -659,11 +583,8 @@
     "getNotificationSchemeToProjectMappings",
     "getNotificationSchemes",
     "getOptionsForContext",
-    "getOrganization",
-    "getOrganizations",
     "getPageAncestors",
     "getPageAttachments",
-    "getPageById",
     "getPageClassificationLevel",
     "getPageContentProperties",
     "getPageContentPropertiesById",
@@ -671,13 +592,11 @@
     "getPageDirectChildren",
     "getPageFooterComments",
     "getPageInlineComments",
-    "getPageLabels",
     "getPageLikeCount",
     "getPageLikeUsers",
     "getPageOperations",
     "getPageVersionDetails",
     "getPageVersions",
-    "getPages",
     "getPagesInSpace",
     "getPermissionScheme",
     "getPermissionSchemeGrant",
@@ -691,16 +610,12 @@
     "getPrecomputations",
     "getPrecomputationsByID",
     "getPreference",
-    "getPriorities",
     "getPrioritiesByPriorityScheme",
-    "getPriority",
     "getPrioritySchemes",
     "getPrivacyUnsafeUserEmail",
     "getPrivacyUnsafeUserEmailBulk",
-    "getProject",
     "getProjectCategoryById",
     "getProjectClassificationConfig",
-    "getProjectComponents",
     "getProjectComponentsPaginated",
     "getProjectContextMapping",
     "getProjectEmail",
@@ -718,7 +633,6 @@
     "getProjectUsagesForStatus",
     "getProjectUsagesForWorkflow",
     "getProjectUsagesForWorkflowScheme",
-    "getProjectVersions",
     "getProjectVersionsPaginated",
     "getProjects",
     "getProjectsByPriorityScheme",
@@ -728,7 +642,6 @@
     "getPropertiesKeys",
     "getProperty",
     "getQueue",
-    "getQueues",
     "getQuickFilter",
     "getRecent",
     "getRedactionStatus",
@@ -745,10 +658,7 @@
     "getRequestTypeById",
     "getRequestTypeFields",
     "getRequestTypeGroups",
-    "getRequestTypes",
     "getRequiredWorkflowSchemeMappings",
-    "getResolution",
-    "getResolutions",
     "getRestrictions",
     "getRestrictionsByOperation",
     "getRestrictionsForOperation",
@@ -763,8 +673,6 @@
     "getSelectableIssueFieldOptions",
     "getSelectedTimeTrackingImplementation",
     "getServerInfo",
-    "getServiceDeskById",
-    "getServiceDesks",
     "getSharePermission",
     "getSharePermissions",
     "getSharedTimeTrackingConfiguration",
@@ -777,7 +685,6 @@
     "getSmartLinkDescendants",
     "getSmartLinkDirectChildren",
     "getSmartLinkOperations",
-    "getSpaceById",
     "getSpaceContentLabels",
     "getSpaceContentStates",
     "getSpaceDefaultClassificationLevel",
@@ -792,12 +699,8 @@
     "getSpaceRolesById",
     "getSpaceSettings",
     "getSpaceTheme",
-    "getSpaces",
-    "getSprint",
-    "getStatus",
     "getStatusCategories",
     "getStatusCategory",
-    "getStatuses",
     "getStatusesById",
     "getStatusesByName",
     "getSubscriptionStatus",
@@ -808,10 +711,8 @@
     "getTeams",
     "getTheme",
     "getThemes",
-    "getTransitions",
     "getTrashedFieldsPaginated",
     "getUiModifications",
-    "getUser",
     "getUserDefaultColumns",
     "getUserEmail",
     "getUserEmailBulk",
@@ -823,7 +724,6 @@
     "getUsersInOrganization",
     "getValidProjectKey",
     "getValidProjectName",
-    "getVersion",
     "getVersionRelatedIssues",
     "getVersionUnresolvedIssues",
     "getViewers",
@@ -835,7 +735,6 @@
     "getWatchesForPage",
     "getWatchesForSpace",
     "getWhiteboardAncestors",
-    "getWhiteboardById",
     "getWhiteboardClassificationLevel",
     "getWhiteboardContentProperties",
     "getWhiteboardContentPropertiesById",
@@ -888,7 +787,6 @@
     "moveIssuesToBacklogForBoard",
     "moveIssuesToBoard",
     "moveIssuesToEpic",
-    "moveIssuesToSprintAndRank",
     "movePage",
     "movePriorities",
     "moveResolutions",
@@ -898,7 +796,6 @@
     "notify",
     "parseJqlQueries",
     "partialUpdateProjectRole",
-    "partiallyUpdateEpic",
     "partiallyUpdateSprint",
     "performCustomerTransition",
     "postBlogPostClassificationLevel",
@@ -938,7 +835,6 @@
     "removeFieldAssociationSchemeItemParameters",
     "removeFieldsAssociatedWithSchemes",
     "removeGadget",
-    "removeGroup",
     "removeGroupById",
     "removeGroupFromContentRestriction",
     "removeIssueTypeFromIssueTypeScheme",
@@ -984,7 +880,6 @@
     "sanitiseJqlQueries",
     "saveTemplate",
     "search",
-    "searchAndReconsileIssuesUsingJql",
     "searchAndReconsileIssuesUsingJqlPost",
     "searchByCQL",
     "searchContentByCQL",
@@ -994,7 +889,6 @@
     "searchForIssuesUsingJqlPost",
     "searchGroups",
     "searchPriorities",
-    "searchProjects",
     "searchProjectsUsingSecuritySchemes",
     "searchResolutions",
     "searchSecuritySchemes",
@@ -1063,20 +957,16 @@
     "updateAttachmentData",
     "updateAttachmentProperties",
     "updateAttachmentPropertyById",
-    "updateBlogPost",
     "updateBlogpostPropertyById",
     "updateComment",
     "updateCommentPropertyById",
-    "updateComponent",
     "updateContentTemplate",
-    "updateCustomContent",
     "updateCustomContentPropertyById",
     "updateCustomField",
     "updateCustomFieldConfiguration",
     "updateCustomFieldContext",
     "updateCustomFieldOption",
     "updateCustomFieldValue",
-    "updateDashboard",
     "updateDatabasePropertyById",
     "updateDefaultProjectClassification",
     "updateDefaultScreenScheme",
@@ -1089,22 +979,18 @@
     "updateFieldConfigurationItems",
     "updateFieldConfigurationScheme",
     "updateFieldsAssociatedWithSchemes",
-    "updateFilter",
     "updateFolderPropertyById",
-    "updateFooterComment",
     "updateGadget",
     "updateInlineComment",
     "updateIssueFieldOption",
     "updateIssueLinkType",
     "updateIssueSecurityScheme",
-    "updateIssueType",
     "updateIssueTypeScheme",
     "updateIssueTypeScreenScheme",
     "updateLookAndFeel",
     "updateLookAndFeelSettings",
     "updateMultipleCustomFieldValues",
     "updateNotificationScheme",
-    "updatePage",
     "updatePagePropertyById",
     "updatePageTitle",
     "updatePermissionScheme",
@@ -1113,7 +999,6 @@
     "updatePrecomputations",
     "updatePriority",
     "updatePriorityScheme",
-    "updateProject",
     "updateProjectAvatar",
     "updateProjectCategory",
     "updateProjectEmail",
@@ -1130,12 +1015,10 @@
     "updateSpacePropertyById",
     "updateSpaceRole",
     "updateSpaceSettings",
-    "updateSprint",
     "updateStatuses",
     "updateTask",
     "updateUiModification",
     "updateUserProperty",
-    "updateVersion",
     "updateWhiteboardPropertyById",
     "updateWorkflowMapping",
     "updateWorkflowScheme",
@@ -1159,5 +1042,456 @@
   },
   "profile_flag": "site",
   "profile_noun": "site",
-  "resources": null
+  "resources": [
+    {
+      "name": "blogposts",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createBlogPost",
+        "delete": "deleteBlogPost",
+        "get": "getBlogPostById",
+        "list": "getBlogPosts",
+        "update": "updateBlogPost"
+      }
+    },
+    {
+      "name": "boards",
+      "product": "agile",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "delete",
+        "sprints",
+        "issues",
+        "backlog"
+      ],
+      "ops": {
+        "backlog": "getIssuesForBacklog",
+        "create": "createBoard",
+        "delete": "deleteBoard",
+        "get": "getBoard",
+        "issues": "getIssuesForBoard",
+        "list": "getAllBoards",
+        "sprints": "getAllSprints"
+      }
+    },
+    {
+      "name": "components",
+      "product": "jira",
+      "verbs": [
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createComponent",
+        "delete": "deleteComponent",
+        "get": "getComponent",
+        "update": "updateComponent"
+      }
+    },
+    {
+      "name": "custom-content",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createCustomContent",
+        "delete": "deleteCustomContent",
+        "get": "getCustomContentById",
+        "list": "getCustomContentByType",
+        "update": "updateCustomContent"
+      }
+    },
+    {
+      "name": "dashboards",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createDashboard",
+        "delete": "deleteDashboard",
+        "get": "getDashboard",
+        "list": "getAllDashboards",
+        "update": "updateDashboard"
+      }
+    },
+    {
+      "name": "epics",
+      "product": "agile",
+      "verbs": [
+        "get",
+        "update"
+      ],
+      "ops": {
+        "get": "getEpic",
+        "update": "partiallyUpdateEpic"
+      }
+    },
+    {
+      "name": "fields",
+      "product": "jira",
+      "verbs": [
+        "list"
+      ],
+      "ops": {
+        "list": "getFields"
+      }
+    },
+    {
+      "name": "filters",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createFilter",
+        "delete": "deleteFilter",
+        "get": "getFilter",
+        "list": "getFiltersPaginated",
+        "update": "updateFilter"
+      }
+    },
+    {
+      "name": "folders",
+      "product": "confluence",
+      "verbs": [
+        "get",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "create": "createFolder",
+        "delete": "deleteFolder",
+        "get": "getFolderById"
+      }
+    },
+    {
+      "name": "groups",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "create": "createGroup",
+        "delete": "removeGroup",
+        "list": "findGroups"
+      }
+    },
+    {
+      "name": "issue-types",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createIssueType",
+        "delete": "deleteIssueType",
+        "get": "getIssueType",
+        "list": "getIssueAllTypes",
+        "update": "updateIssueType"
+      }
+    },
+    {
+      "name": "issues",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "new",
+        "update",
+        "delete",
+        "transitions",
+        "transition",
+        "assign",
+        "comment",
+        "comments",
+        "log-work"
+      ],
+      "ops": {
+        "assign": "assignIssue",
+        "comment": "addComment",
+        "comments": "getComments",
+        "delete": "deleteIssue",
+        "get": "getIssue",
+        "list": "searchAndReconsileIssuesUsingJql",
+        "log-work": "addWorklog",
+        "new": "createIssue",
+        "transition": "doTransition",
+        "transitions": "getTransitions",
+        "update": "editIssue"
+      }
+    },
+    {
+      "name": "organizations",
+      "product": "jsm",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "create": "createOrganization",
+        "delete": "deleteOrganization",
+        "get": "getOrganization",
+        "list": "getOrganizations"
+      }
+    },
+    {
+      "name": "page-attachments",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "delete"
+      ],
+      "ops": {
+        "delete": "deleteAttachment",
+        "get": "getAttachmentById",
+        "list": "getAttachments"
+      }
+    },
+    {
+      "name": "page-comments",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createFooterComment",
+        "delete": "deleteFooterComment",
+        "get": "getFooterCommentById",
+        "list": "getFooterComments",
+        "update": "updateFooterComment"
+      }
+    },
+    {
+      "name": "pages",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "new",
+        "edit",
+        "delete",
+        "children",
+        "labels"
+      ],
+      "ops": {
+        "children": "getChildPages",
+        "delete": "deletePage",
+        "edit": "updatePage",
+        "get": "getPageById",
+        "labels": "getPageLabels",
+        "list": "getPages",
+        "new": "createPage"
+      }
+    },
+    {
+      "name": "priorities",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get"
+      ],
+      "ops": {
+        "get": "getPriority",
+        "list": "getPriorities"
+      }
+    },
+    {
+      "name": "projects",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete",
+        "versions",
+        "components"
+      ],
+      "ops": {
+        "components": "getProjectComponents",
+        "create": "createProject",
+        "delete": "deleteProject",
+        "get": "getProject",
+        "list": "searchProjects",
+        "update": "updateProject",
+        "versions": "getProjectVersions"
+      }
+    },
+    {
+      "name": "requests",
+      "product": "jsm",
+      "verbs": [
+        "list",
+        "get",
+        "create"
+      ],
+      "ops": {
+        "create": "createCustomerRequest",
+        "get": "getCustomerRequestByIdOrKey",
+        "list": "getCustomerRequests"
+      }
+    },
+    {
+      "name": "resolutions",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get"
+      ],
+      "ops": {
+        "get": "getResolution",
+        "list": "getResolutions"
+      }
+    },
+    {
+      "name": "servicedesks",
+      "product": "jsm",
+      "verbs": [
+        "list",
+        "get",
+        "queues",
+        "queue-issues",
+        "request-types",
+        "customers"
+      ],
+      "ops": {
+        "customers": "getCustomers",
+        "get": "getServiceDeskById",
+        "list": "getServiceDesks",
+        "queue-issues": "getIssuesInQueue",
+        "queues": "getQueues",
+        "request-types": "getRequestTypes"
+      }
+    },
+    {
+      "name": "spaces",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create"
+      ],
+      "ops": {
+        "create": "createSpace",
+        "get": "getSpaceById",
+        "list": "getSpaces"
+      }
+    },
+    {
+      "name": "sprints",
+      "product": "agile",
+      "verbs": [
+        "get",
+        "create",
+        "update",
+        "delete",
+        "issues",
+        "move"
+      ],
+      "ops": {
+        "create": "createSprint",
+        "delete": "deleteSprint",
+        "get": "getSprint",
+        "issues": "getIssuesForSprint",
+        "move": "moveIssuesToSprintAndRank",
+        "update": "updateSprint"
+      }
+    },
+    {
+      "name": "statuses",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get"
+      ],
+      "ops": {
+        "get": "getStatus",
+        "list": "getStatuses"
+      }
+    },
+    {
+      "name": "users",
+      "product": "jira",
+      "verbs": [
+        "search",
+        "me",
+        "get",
+        "list"
+      ],
+      "ops": {
+        "get": "getUser",
+        "list": "getAllUsers",
+        "me": "getCurrentUser",
+        "search": "findUsers"
+      }
+    },
+    {
+      "name": "versions",
+      "product": "jira",
+      "verbs": [
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "create": "createVersion",
+        "delete": "deleteVersion",
+        "get": "getVersion",
+        "update": "updateVersion"
+      }
+    },
+    {
+      "name": "whiteboards",
+      "product": "confluence",
+      "verbs": [
+        "get",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "create": "createWhiteboard",
+        "delete": "deleteWhiteboard",
+        "get": "getWhiteboardById"
+      }
+    }
+  ]
 }

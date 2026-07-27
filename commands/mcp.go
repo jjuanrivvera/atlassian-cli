@@ -46,16 +46,23 @@ var mcpExcludedFlags = []string{
 	"base-url",
 }
 
-// mcpCommandSelector accepts a command only when neither it nor any ancestor is an excluded
-// group. Walking to the root is what makes the exclusion cover whole subtrees (`auth login`,
-// `config set`) while still matching group names exactly.
+// mcpCommandSelector accepts a command unless its TOP-LEVEL group is excluded.
+//
+// Only the top-level name is compared, deliberately. Testing every node on the way up would
+// also match a leaf that happens to share a name with an excluded group — `update` is both
+// the binary's self-updater and the verb on every resource, so that version silently drops
+// `projects update`, `sprints update`, `versions update` and the rest of the write surface.
+// The subtree of an excluded group is still fully covered, because every command inside it
+// resolves to the same top-level name.
 func mcpCommandSelector(cmd *cobra.Command) bool {
-	for c := cmd; c != nil && c.HasParent(); c = c.Parent() {
-		if slices.Contains(mcpExcludedGroups, c.Name()) {
-			return false
-		}
+	top := cmd
+	for top.HasParent() && top.Parent().HasParent() {
+		top = top.Parent()
 	}
-	return true
+	if !top.HasParent() {
+		return false // the root itself is not a tool
+	}
+	return !slices.Contains(mcpExcludedGroups, top.Name())
 }
 
 func init() {

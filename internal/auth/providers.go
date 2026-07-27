@@ -85,14 +85,23 @@ type OAuthAuth struct {
 
 func (o *OAuthAuth) Method() string { return config.MethodOAuth2 }
 
-// TokenURL is Atlassian's OAuth 2.0 token endpoint.
-const TokenURL = "https://auth.atlassian.com/oauth/token"
+// Atlassian's OAuth 2.0 endpoints.
+//
+// These are variables rather than constants so tests can point the refresh and
+// cloud-id-discovery flows at a local httptest server; nothing else reassigns them.
+var (
+	// TokenURL is where authorization codes and refresh tokens are exchanged.
+	TokenURL = "https://auth.atlassian.com/oauth/token"
+	// AuthorizeURL is where the user grants consent.
+	AuthorizeURL = "https://auth.atlassian.com/authorize"
+	// AccessibleResourcesURL lists the sites a token can reach, and their cloud ids.
+	AccessibleResourcesURL = "https://api.atlassian.com/oauth/token/accessible-resources"
+)
 
-// AuthorizeURL is where the user grants consent.
-const AuthorizeURL = "https://auth.atlassian.com/authorize"
-
-// AccessibleResourcesURL lists the sites a token can reach, and their cloud ids.
-const AccessibleResourcesURL = "https://api.atlassian.com/oauth/token/accessible-resources"
+// setTokenURL and setAccessibleResourcesURL exist so tests redirect the OAuth endpoints
+// through one named seam instead of assigning the package variables directly.
+func setTokenURL(u string)               { TokenURL = u }
+func setAccessibleResourcesURL(u string) { AccessibleResourcesURL = u }
 
 // refreshSkew refreshes slightly early so a token cannot expire between the check and the
 // request reaching Atlassian.

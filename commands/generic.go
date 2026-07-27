@@ -429,7 +429,9 @@ func singular(s string) string {
 	switch {
 	case strings.HasSuffix(s, "ies"):
 		return strings.TrimSuffix(s, "ies") + "y"
-	case strings.HasSuffix(s, "sses"), strings.HasSuffix(s, "shes"):
+	// "statuses" -> "status", "sses"/"shes"/"ches" -> drop just the "es". Trimming a bare
+	// "s" here would leave "statuse", which reads as a typo in every help string.
+	case strings.HasSuffix(s, "ses"), strings.HasSuffix(s, "shes"), strings.HasSuffix(s, "ches"), strings.HasSuffix(s, "xes"):
 		return strings.TrimSuffix(s, "es")
 	case strings.HasSuffix(s, "s"):
 		return strings.TrimSuffix(s, "s")

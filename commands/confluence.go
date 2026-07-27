@@ -457,7 +457,14 @@ func inlineToStorage(s string) string {
 	s = escapeXML(s)
 	s = replacePaired(s, "**", "<strong>", "</strong>")
 	s = replacePaired(s, "`", "<code>", "</code>")
+
+	// Any ** still present had no partner, so it must stay literal. It is parked behind a
+	// sentinel first: the single-* pass below would otherwise see its two asterisks as a
+	// matched italic pair and emit an empty <em></em> around nothing.
+	const doubleStar = "\x00DOUBLESTAR\x00"
+	s = strings.ReplaceAll(s, "**", doubleStar)
 	s = replacePaired(s, "*", "<em>", "</em>")
+	s = strings.ReplaceAll(s, doubleStar, "**")
 	return s
 }
 

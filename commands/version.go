@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jjuanrivvera/atlassian-cli/internal/output"
 	"github.com/jjuanrivvera/atlassian-cli/internal/version"
 )
 
@@ -26,7 +27,11 @@ func newVersionCmd(o *globalOptions) *cobra.Command {
 				return runVersionCheck(cmd, info, asJSON)
 			}
 			if asJSON {
-				return o.renderer(cmd, nil).Render(info)
+				// --json is explicit: it must win over the -o default (table) rather than
+				// quietly rendering a table because nobody passed -o json as well.
+				r := o.renderer(cmd, nil)
+				r.Format = output.FormatJSON
+				return r.Render(info)
 			}
 			fmt.Fprintln(cmd.OutOrStdout(), info.String())
 			return nil

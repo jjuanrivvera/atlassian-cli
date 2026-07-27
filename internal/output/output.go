@@ -6,6 +6,7 @@
 package output
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -97,15 +98,25 @@ func (r *Renderer) Render(v any) error {
 // own response is never re-marshalled (which would reorder keys and lose number precision).
 func (r *Renderer) RenderRaw(raw []byte) error {
 	if r.Format == FormatJSON || r.Format == "" {
-		var buf any
-		if err := json.Unmarshal(raw, &buf); err != nil {
-			_, err := r.Out.Write(append(raw, '\n'))
-			return err
+		// Indent the original bytes rather than decoding and re-encoding them. Decoding into
+		// `any` turns every number into a float64, which silently rounds ids above 2^53 —
+		// and Jira issue and Confluence content ids on large instances exceed that.
+		var pretty bytes.Buffer
+		if err := json.Indent(&pretty, raw, "", "  "); err != nil {
+			// Not valid JSON (a plain-text or HTML body); emit it verbatim.
+			_, werr := r.Out.Write(append(raw, '\n'))
+			return werr
 		}
-		return r.renderJSON(buf)
+		pretty.WriteByte('\n')
+		_, err := r.Out.Write(pretty.Bytes())
+		return err
 	}
+
+	// The other formats need a decoded value. UseNumber keeps the digits intact here too.
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
 	var v any
-	if err := json.Unmarshal(raw, &v); err != nil {
+	if err := dec.Decode(&v); err != nil {
 		return fmt.Errorf("decode response: %w", err)
 	}
 	return r.Render(v)
@@ -362,7 +373,14 @@ func flatten(m map[string]any) map[string]any {
 				continue
 			}
 			for sk, sv := range t {
-				if _, nested := sv.(map[string]any); nested {
+				if nested, isMap := sv.(map[string]any); isMap {
+					// A second-level reference object is where Jira keeps the values people
+					// actually want in a table: issue.fields.status, .assignee, .priority.
+					// Skipping every nested map would drop all of them and leave a table of
+					// just summaries and timestamps.
+					if label, ok := refLabel(nested); ok {
+						out[k+"."+sk] = label
+					}
 					continue
 				}
 				if _, arr := sv.([]any); arr {

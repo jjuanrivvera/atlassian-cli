@@ -84,3 +84,7 @@ func readFileForFlag(path string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+// jsonUnmarshalQuiet decodes without wrapping the error, for callers that treat a decode
+// failure as "this optional field is absent" rather than as a fatal condition.
+func jsonUnmarshalQuiet(raw []byte, out any) error { return json.Unmarshal(raw, out) }

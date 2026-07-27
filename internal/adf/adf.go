@@ -194,6 +194,13 @@ func inline(s string) []Node {
 				i += 2 + end + 2
 				continue
 			}
+			// Unmatched: emit BOTH asterisks literally and step past them together. Writing
+			// just one would leave the second to be read as an italic delimiter on the next
+			// iteration, silently turning "a ** dangling and *also" into emphasis the user
+			// never asked for.
+			buf.WriteString("**")
+			i += 2
+			continue
 		case s[i] == '`':
 			if end := strings.IndexByte(s[i+1:], '`'); end > 0 {
 				flush()

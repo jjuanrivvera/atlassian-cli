@@ -30,6 +30,14 @@ const KeyringService = "atlassian-cli"
 // KeyringPasswordEnv unlocks the encrypted-file fallback.
 const KeyringPasswordEnv = "ATLASSIAN_KEYRING_PASSWORD"
 
+// KeyringBackendEnv forces a specific credential store: "file" for the encrypted file,
+// "keyring" for the OS keyring. Unset means "OS keyring, falling back to the file".
+//
+// Forcing it matters in two real cases: a machine where the OS keyring exists but you want
+// portable, copyable credentials, and a test suite, which must never write into the
+// developer's actual Keychain or Secret Service.
+const KeyringBackendEnv = "ATLASSIAN_KEYRING_BACKEND"
+
 // Credential is everything secret for one site. Only the fields relevant to the site's auth
 // method are populated.
 type Credential struct {
@@ -64,6 +72,16 @@ var ErrNotFound = errors.New("no stored credential")
 // NewStore returns the keyring store, falling back to the encrypted file when the OS keyring
 // is unavailable *and* a keyring password is configured.
 func NewStore() Store {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv(KeyringBackendEnv))) {
+	case "file":
+		if fs, err := NewFileStore(""); err == nil {
+			return fs
+		}
+		// Falling through to the OS keyring here would silently ignore an explicit request;
+		// the file store only fails when the password is unset, which the error names.
+	case "keyring":
+		return &keyringStore{}
+	}
 	if os.Getenv(KeyringPasswordEnv) != "" && !keyringUsable() {
 		if fs, err := NewFileStore(""); err == nil {
 			return fs

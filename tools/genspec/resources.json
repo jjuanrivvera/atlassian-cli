@@ -1,0 +1,454 @@
+{
+  "resources": [
+    {
+      "name": "blogposts",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "list": "getBlogPosts",
+        "get": "getBlogPostById",
+        "create": "createBlogPost",
+        "update": "updateBlogPost",
+        "delete": "deleteBlogPost"
+      }
+    },
+    {
+      "name": "boards",
+      "product": "agile",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "delete",
+        "sprints",
+        "issues",
+        "backlog"
+      ],
+      "ops": {
+        "list": "getAllBoards",
+        "get": "getBoard",
+        "create": "createBoard",
+        "delete": "deleteBoard",
+        "sprints": "getAllSprints",
+        "issues": "getIssuesForBoard",
+        "backlog": "getIssuesForBacklog"
+      }
+    },
+    {
+      "name": "components",
+      "product": "jira",
+      "verbs": [
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "get": "getComponent",
+        "create": "createComponent",
+        "update": "updateComponent",
+        "delete": "deleteComponent"
+      }
+    },
+    {
+      "name": "custom-content",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "list": "getCustomContentByType",
+        "get": "getCustomContentById",
+        "create": "createCustomContent",
+        "update": "updateCustomContent",
+        "delete": "deleteCustomContent"
+      }
+    },
+    {
+      "name": "dashboards",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "list": "getAllDashboards",
+        "get": "getDashboard",
+        "create": "createDashboard",
+        "update": "updateDashboard",
+        "delete": "deleteDashboard"
+      }
+    },
+    {
+      "name": "epics",
+      "product": "agile",
+      "verbs": [
+        "get",
+        "update"
+      ],
+      "ops": {
+        "get": "getEpic",
+        "update": "partiallyUpdateEpic"
+      }
+    },
+    {
+      "name": "fields",
+      "product": "jira",
+      "verbs": [
+        "list"
+      ],
+      "ops": {
+        "list": "getFields"
+      }
+    },
+    {
+      "name": "filters",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "list": "getFiltersPaginated",
+        "get": "getFilter",
+        "create": "createFilter",
+        "update": "updateFilter",
+        "delete": "deleteFilter"
+      }
+    },
+    {
+      "name": "folders",
+      "product": "confluence",
+      "verbs": [
+        "get",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "get": "getFolderById",
+        "create": "createFolder",
+        "delete": "deleteFolder"
+      }
+    },
+    {
+      "name": "groups",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "list": "findGroups",
+        "create": "createGroup",
+        "delete": "removeGroup"
+      }
+    },
+    {
+      "name": "issue-types",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "list": "getIssueAllTypes",
+        "get": "getIssueType",
+        "create": "createIssueType",
+        "update": "updateIssueType",
+        "delete": "deleteIssueType"
+      }
+    },
+    {
+      "name": "issues",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "new",
+        "update",
+        "delete",
+        "transitions",
+        "transition",
+        "assign",
+        "comment",
+        "comments",
+        "log-work"
+      ],
+      "ops": {
+        "list": "searchAndReconsileIssuesUsingJql",
+        "get": "getIssue",
+        "new": "createIssue",
+        "update": "editIssue",
+        "delete": "deleteIssue",
+        "transitions": "getTransitions",
+        "transition": "doTransition",
+        "assign": "assignIssue",
+        "comment": "addComment",
+        "comments": "getComments",
+        "log-work": "addWorklog"
+      }
+    },
+    {
+      "name": "organizations",
+      "product": "jsm",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "list": "getOrganizations",
+        "get": "getOrganization",
+        "create": "createOrganization",
+        "delete": "deleteOrganization"
+      }
+    },
+    {
+      "name": "page-attachments",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "delete"
+      ],
+      "ops": {
+        "list": "getAttachments",
+        "get": "getAttachmentById",
+        "delete": "deleteAttachment"
+      }
+    },
+    {
+      "name": "page-comments",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "list": "getFooterComments",
+        "get": "getFooterCommentById",
+        "create": "createFooterComment",
+        "update": "updateFooterComment",
+        "delete": "deleteFooterComment"
+      }
+    },
+    {
+      "name": "pages",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "new",
+        "edit",
+        "delete",
+        "children",
+        "labels"
+      ],
+      "ops": {
+        "list": "getPages",
+        "get": "getPageById",
+        "new": "createPage",
+        "edit": "updatePage",
+        "delete": "deletePage",
+        "children": "getChildPages",
+        "labels": "getPageLabels"
+      }
+    },
+    {
+      "name": "priorities",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get"
+      ],
+      "ops": {
+        "list": "getPriorities",
+        "get": "getPriority"
+      }
+    },
+    {
+      "name": "projects",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get",
+        "create",
+        "update",
+        "delete",
+        "versions",
+        "components"
+      ],
+      "ops": {
+        "list": "searchProjects",
+        "get": "getProject",
+        "create": "createProject",
+        "update": "updateProject",
+        "delete": "deleteProject",
+        "versions": "getProjectVersions",
+        "components": "getProjectComponents"
+      }
+    },
+    {
+      "name": "requests",
+      "product": "jsm",
+      "verbs": [
+        "list",
+        "get",
+        "create"
+      ],
+      "ops": {
+        "list": "getCustomerRequests",
+        "get": "getCustomerRequestByIdOrKey",
+        "create": "createCustomerRequest"
+      }
+    },
+    {
+      "name": "resolutions",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get"
+      ],
+      "ops": {
+        "list": "getResolutions",
+        "get": "getResolution"
+      }
+    },
+    {
+      "name": "servicedesks",
+      "product": "jsm",
+      "verbs": [
+        "list",
+        "get",
+        "queues",
+        "queue-issues",
+        "request-types",
+        "customers"
+      ],
+      "ops": {
+        "list": "getServiceDesks",
+        "get": "getServiceDeskById",
+        "queues": "getQueues",
+        "queue-issues": "getIssuesInQueue",
+        "request-types": "getRequestTypes",
+        "customers": "getCustomers"
+      }
+    },
+    {
+      "name": "spaces",
+      "product": "confluence",
+      "verbs": [
+        "list",
+        "get",
+        "create"
+      ],
+      "ops": {
+        "list": "getSpaces",
+        "get": "getSpaceById",
+        "create": "createSpace"
+      }
+    },
+    {
+      "name": "sprints",
+      "product": "agile",
+      "verbs": [
+        "get",
+        "create",
+        "update",
+        "delete",
+        "issues",
+        "move"
+      ],
+      "ops": {
+        "get": "getSprint",
+        "create": "createSprint",
+        "update": "updateSprint",
+        "delete": "deleteSprint",
+        "issues": "getIssuesForSprint",
+        "move": "moveIssuesToSprintAndRank"
+      }
+    },
+    {
+      "name": "statuses",
+      "product": "jira",
+      "verbs": [
+        "list",
+        "get"
+      ],
+      "ops": {
+        "list": "getStatuses",
+        "get": "getStatus"
+      }
+    },
+    {
+      "name": "users",
+      "product": "jira",
+      "verbs": [
+        "search",
+        "me",
+        "get",
+        "list"
+      ],
+      "ops": {
+        "search": "findUsers",
+        "me": "getCurrentUser",
+        "get": "getUser",
+        "list": "getAllUsers"
+      }
+    },
+    {
+      "name": "versions",
+      "product": "jira",
+      "verbs": [
+        "get",
+        "create",
+        "update",
+        "delete"
+      ],
+      "ops": {
+        "get": "getVersion",
+        "create": "createVersion",
+        "update": "updateVersion",
+        "delete": "deleteVersion"
+      }
+    },
+    {
+      "name": "whiteboards",
+      "product": "confluence",
+      "verbs": [
+        "get",
+        "create",
+        "delete"
+      ],
+      "ops": {
+        "get": "getWhiteboardById",
+        "create": "createWhiteboard",
+        "delete": "deleteWhiteboard"
+      }
+    }
+  ]
+}
