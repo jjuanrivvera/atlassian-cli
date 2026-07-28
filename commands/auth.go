@@ -235,8 +235,8 @@ instead of opening it, or --mode oob to paste the code by hand where no browser 
 	cmd.Flags().StringVar(&method, "method", "", "auth method: basic|pat|oauth2")
 	cmd.Flags().StringVar(&email, "email", "", "account email (basic auth)")
 	cmd.Flags().StringVar(&token, "token", "", "API token or personal access token (prompted if omitted)")
-	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id (defaults to this CLI's own registered app)")
-	cmd.Flags().StringVar(&secret, "client-secret", "", "OAuth client secret")
+	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id, from your app's Settings page")
+	cmd.Flags().StringVar(&secret, "client-secret", "", "OAuth client secret (required: Atlassian has no public-client mode)")
 	cmd.Flags().StringVar(&mode, "mode", "auto", "OAuth redirect handling: auto|local|oob")
 	cmd.Flags().IntVar(&port, "port", DefaultOAuthPort,
 		"loopback port for the OAuth redirect — must match the callback URL registered on the app")

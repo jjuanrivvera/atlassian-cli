@@ -40,8 +40,8 @@ atlassian auth login                        # Cloud: email + API token
 ### Options
 
 ```
-      --client-id string       OAuth client id (defaults to this CLI's own registered app)
-      --client-secret string   OAuth client secret
+      --client-id string       OAuth client id, from your app's Settings page
+      --client-secret string   OAuth client secret (required: Atlassian has no public-client mode)
       --email string           account email (basic auth)
   -h, --help                   help for login
       --method string          auth method: basic|pat|oauth2
