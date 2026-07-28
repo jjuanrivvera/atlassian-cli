@@ -6,6 +6,66 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-28
+
+Everything below the OAuth section came out of running all 68 read commands against a live
+Jira Cloud site. Each of those bugs passed the mock suite, because a mock returns the shape
+its author assumed.
+
+### Added
+
+- **The OAuth flow opens your browser** instead of printing a URL to copy, where a soft wrap
+  or a stray character silently breaks the exchange. `--no-browser` prints it instead, and
+  the URL is printed anyway whenever the opener fails, since it can fail silently.
+- **`atlassian open`** (aliases `browse`, `web`) maps an issue key, project key or page id to
+  its UI URL. `--print` emits the URL for piping or for a machine with no browser.
+- **`init --client-id` and `init --scopes`**, so an OAuth setup is scriptable end to end.
+  `init --method oauth2 --client-id <id>` previously failed with `unknown flag`.
+- **Privacy policy and terms** pages, describing what is stored locally and which hosts are
+  contacted — no telemetry, and `api.github.com` only behind an explicit `version --check`.
+
+### Changed
+
+- **OAuth requests the full classic scope set** for all four products (26 scopes) rather than
+  six. Atlassian freezes the granted set at consent, so a scope added later forces every
+  existing user to re-consent; `--scopes` still narrows it.
+- **`--method oauth2` now requires `--client-id` and `--client-secret`** and refuses before
+  opening a browser when either is missing. Atlassian's token endpoint advertises only
+  `client_secret_basic` and `client_secret_post` — there is no public-client mode, and PKCE
+  does not substitute for one — so a secretless login consents successfully and then dies at
+  the exchange with a bare `401`. See DECISIONS.md #14.
+- **The OAuth redirect binds a fixed port** (8990, `--port` to move it). Atlassian matches
+  `redirect_uri` exactly and allows no wildcard, so an ephemeral port could never match a
+  registered callback URL.
+- **Tables show the columns a resource curates**, not those plus every other key in the
+  payload. Headers read as headings rather than lookup paths, timestamps render as
+  `2026-07-24 15:35` in tables while CSV and JSON keep the exact value, a scalar result
+  prints bare so it can be used in a shell substitution, and cells are trimmed.
+
+### Fixed
+
+- **`issues comments` returned empty on every issue, and `dashboards list` on every site.**
+  Atlassian does not settle on one key for the item array in a paginated response: most
+  collections use `values`, comments use `comments`, worklogs `worklogs`, dashboards
+  `dashboards`. An unrecognized key decoded to an empty page — indistinguishable from "there
+  are none". Ambiguous shapes still decode to empty rather than guessing.
+- **`issues list` printed a table of numbers.** `/search/jql` returns only the issue id unless
+  `fields` is supplied — no key, no summary, not even `self` — a behavioural change from the
+  deprecated `/search`, which defaulted to all navigable fields.
+- **`--dry-run` printed requests that were wrong.** It suppressed the read lookups a command
+  needs in order to *build* its request, so `issues assign --to me` emitted
+  `{"accountId":""}`. Reads now go through a read-through client while the mutating request
+  is still suppressed. A dry run that displays an incorrect request is worse than one that
+  errors.
+- **`--dry-run` claimed success**, printing `assigned PP-1071` after sending nothing.
+- **`-o id` printed nothing for issues**: the fallback retried the field it had just missed
+  instead of the other identifier.
+- **`doctor` gave wrong advice on Confluence**, emitting the generic 401 hint "run auth login"
+  when Jira had just authenticated with the same credential. It now names the likely cause:
+  the site may not have Confluence, or the account may not be licensed for it.
+- **Prompts reported `EOF`** instead of naming the missing value when stdin was empty, which
+  is what any scripted use looks like.
+
 ## [0.1.1] - 2026-07-27
 
 ### Fixed
@@ -58,6 +118,7 @@ First release.
   formula-injection neutralization and terminal-escape sanitization.
 - `--dry-run` printing the equivalent curl with the credential redacted.
 
-[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jjuanrivvera/atlassian-cli/releases/tag/v0.1.0
