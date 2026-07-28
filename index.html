@@ -14,13 +14,13 @@
       
       
       
-        <link rel="next" href="comparison/">
+        <link rel="next" href="oauth-app/">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="assets/logo.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
@@ -94,8 +94,7 @@
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="." title="atlassian" class="md-header__button md-logo" aria-label="atlassian" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -232,8 +231,7 @@
   <label class="md-nav__title" for="__drawer">
     <a href="." title="atlassian" class="md-nav__button md-logo" aria-label="atlassian" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="assets/logo.svg" alt="logo">
 
     </a>
     atlassian
@@ -418,6 +416,33 @@
   
   
     <li class="md-nav__item">
+      <a href="oauth-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OAuth setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="comparison/" class="md-nav__link">
         
   
@@ -453,6 +478,60 @@
     
   
     Command reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="terms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terms of service
   
 
     
@@ -598,6 +677,8 @@
 
 <div align="center">
 
+<img src="assets/logo.svg" alt="" width="96" height="96">
+
 # atlassian
 
 [![CI](https://github.com/jjuanrivvera/atlassian-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/jjuanrivvera/atlassian-cli/actions/workflows/ci.yml)
@@ -695,7 +776,7 @@ existing body when only the title changes — otherwise the page is silently emp
 <p><strong>Built for agents.</strong> <code>atlassian mcp</code> serves the whole command tree as annotated MCP tools
 over the same client, keyring and <code>--dry-run</code>. <code>atlassian agent guard</code> reads the live tree and
 emits host safety config — irreversible operations blocked, writes gated, reads free. See
-<a href="docs/comparison.md">the comparison with Atlassian's own MCP server</a>.</p>
+<a href="comparison/">the comparison with Atlassian's own MCP server</a>.</p>
 <h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
 <p>Every command speaks table (default), <code>json</code>, <code>yaml</code>, <code>csv</code> and <code>id</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>atlassian<span class="w"> </span>issues<span class="w"> </span>list<span class="w"> </span>--jql<span class="w"> </span><span class="s1">&#39;project = PP&#39;</span><span class="w"> </span>-o<span class="w"> </span>csv<span class="w"> </span>&gt;<span class="w"> </span>issues.csv
@@ -737,8 +818,12 @@ sequences are stripped from API-supplied text before it reaches your terminal.</
 <td>Every command, generated from the binary</td>
 </tr>
 <tr>
-<td><a href="docs/comparison.md">Comparison</a></td>
+<td><a href="comparison/">Comparison</a></td>
 <td>Against Atlassian's Rovo MCP server, <code>acli</code> and <code>jira-cli</code></td>
+</tr>
+<tr>
+<td><a href="oauth-app/">OAuth setup</a></td>
+<td>Creating a developer app, if you need <code>--method oauth2</code></td>
 </tr>
 <tr>
 <td><a href="DECISIONS.md">DECISIONS.md</a></td>

@@ -2,802 +2,818 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/comparison/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
+    </url>
+    <url>
+         <loc>https://jjuanrivvera.github.io/atlassian-cli/oauth-app/</loc>
+         <lastmod>2026-07-28</lastmod>
+    </url>
+    <url>
+         <loc>https://jjuanrivvera.github.io/atlassian-cli/privacy/</loc>
+         <lastmod>2026-07-28</lastmod>
+    </url>
+    <url>
+         <loc>https://jjuanrivvera.github.io/atlassian-cli/terms/</loc>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_agent/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_agent_classify/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_agent_guard/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_alias/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_alias_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_alias_remove/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_alias_set/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_api/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_auth/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_auth_login/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_auth_logout/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_auth_status/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_blogposts/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_blogposts_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_blogposts_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_blogposts_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_blogposts_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_blogposts_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_backlog/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_issues/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_boards_sprints/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_completion/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_components/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_components_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_components_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_components_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_components_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config_list-sites/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config_path/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config_remove/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config_set/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config_use/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_config_view/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_custom-content/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_custom-content_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_custom-content_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_custom-content_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_custom-content_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_custom-content_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_dashboards/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_dashboards_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_dashboards_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_dashboards_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_dashboards_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_dashboards_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_doctor/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_epics/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_epics_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_epics_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_fields/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_fields_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_filters/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_filters_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_filters_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_filters_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_filters_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_filters_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_folders/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_folders_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_folders_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_folders_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_groups/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_groups_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_groups_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_groups_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_init/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issue-types/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issue-types_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issue-types_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issue-types_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issue-types_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issue-types_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_assign/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_attachments/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_comment/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_comments/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_log-work/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_new/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_transition/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_transitions/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_issues_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_claude/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_claude_disable/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_claude_enable/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_claude_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_cursor/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_cursor_disable/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_cursor_enable/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_cursor_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_start/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_stream/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_tools/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_vscode/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_vscode_disable/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_vscode_enable/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_mcp_vscode_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_op/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_op_call/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_op_describe/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_op_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_op_search/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
+    </url>
+    <url>
+         <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_open/</loc>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_organizations/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_organizations_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_organizations_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_organizations_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_organizations_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-attachments/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-attachments_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-attachments_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-attachments_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-comments/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-comments_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-comments_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-comments_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-comments_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_page-comments_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_children/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_edit/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_labels/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_new/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_pages_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_priorities/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_priorities_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_priorities_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_components/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_issue-types/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_projects_versions/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_requests/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_requests_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_requests_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_requests_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_resolutions/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_resolutions_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_resolutions_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_search/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks_customers/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks_queue-issues/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks_queues/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_servicedesks_request-types/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_spaces/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_spaces_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_spaces_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_spaces_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_close/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_issues/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_move/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_start/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_sprints_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_statuses/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_statuses_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_statuses_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_users/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_users_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_users_list/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_users_me/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_users_search/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_version/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_versions/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_versions_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_versions_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_versions_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_versions_update/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_whiteboards/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_whiteboards_create/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_whiteboards_delete/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
     <url>
          <loc>https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian_whiteboards_get/</loc>
-         <lastmod>2026-07-27</lastmod>
+         <lastmod>2026-07-28</lastmod>
     </url>
 </urlset>

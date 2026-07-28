@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="atlassian CLI">
+  <title>atlassian CLI</title>
+
+  <!--
+    A terminal prompt: one chevron and a cursor. Deliberately a single chevron rather than the
+    stacked pair Atlassian's own mark uses — two overlapping chevrons turn to mush below about
+    32px, which is where a favicon and a README badge live.
+
+    The Atlassian reference is carried by the palette instead (B200 #2684FF → B400 #0052CC on a
+    dark terminal ground): it sits correctly beside the products it drives without imitating
+    their logo.
+  -->
+
+  <defs>
+    <linearGradient id="chev" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4C9AFF"/>
+      <stop offset="100%" stop-color="#0052CC"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Terminal window -->
+  <rect x="4" y="10" width="120" height="108" rx="16" fill="#0B1524"/>
+  <rect x="5" y="11" width="118" height="106" rx="15" fill="none" stroke="#22344F" stroke-width="2"/>
+
+  <!-- Title bar: a hairline, so it reads as chrome at large sizes and vanishes at small ones -->
+  <path d="M5 32 H123" stroke="#22344F" stroke-width="2"/>
+  <circle cx="20" cy="21" r="3.4" fill="#FF5630"/>
+  <circle cx="33" cy="21" r="3.4" fill="#FFAB00"/>
+  <circle cx="46" cy="21" r="3.4" fill="#36B37E"/>
+
+  <!-- Prompt caret -->
+  <polyline points="30,54 58,76 30,98" fill="none" stroke="url(#chev)"
+            stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Cursor -->
+  <rect x="72" y="88" width="30" height="10" rx="5" fill="#4C9AFF"/>
+</svg>
