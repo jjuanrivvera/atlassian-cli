@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oauth" class="md-skip">
+        <a href="#creating-an-oauth-developer-app" class="md-skip">
           Skip to content
         </a>
       
@@ -347,17 +347,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#you-probably-dont-need-this-page" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        You probably don't need this page
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-you-are-about-to-create" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -610,17 +599,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#you-probably-dont-need-this-page" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        You probably don't need this page
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#what-you-are-about-to-create" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -747,22 +725,29 @@
 
 
 
-<h1 id="oauth">OAuth<a class="headerlink" href="#oauth" title="Permanent link">&para;</a></h1>
-<h2 id="you-probably-dont-need-this-page">You probably don't need this page<a class="headerlink" href="#you-probably-dont-need-this-page" title="Permanent link">&para;</a></h2>
-<p><code>--method oauth2</code> works with no setup at all — the CLI ships its own registered app:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>atlassian<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--method<span class="w"> </span>oauth2
-</code></pre></div>
-<p>That opens your browser, asks you to consent, and stores the token in your keyring. Revoke it
-whenever you like at
-<a href="https://id.atlassian.com/manage-profile/apps">id.atlassian.com/manage-profile/apps</a>.</p>
-<p>An API token (<code>atlassian init</code>) is still the simpler default: 30 seconds, no browser, no
-refresh handling. OAuth earns its keep when you want per-user consent and revocation rather
+<h1 id="creating-an-oauth-developer-app">Creating an OAuth developer app<a class="headerlink" href="#creating-an-oauth-developer-app" title="Permanent link">&para;</a></h1>
+<p>You only need this if you want <code>--method oauth2</code>. <strong>Most people should not.</strong> An API token
+(<code>atlassian init</code>) takes 30 seconds, needs no app, no callback URL and no refresh handling, and
+gives the CLI exactly your own permissions.</p>
+<p>OAuth earns its complexity in one situation: you want per-user consent and revocation rather
 than everyone minting a personal token.</p>
-<p>The rest of this page is for <strong>registering your own app</strong>, which you'd do to keep your own
-audit trail of consents, to avoid sharing this project's rate limits, or because your
-organisation requires apps to be registered internally. Then:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>atlassian<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span>--client-id<span class="w"> </span>&lt;your<span class="w"> </span>id&gt;
-</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Why there is no built-in app to borrow</p>
+<p>Most CLIs ship a client id so OAuth works out of the box. Atlassian does not permit it.
+Its identity server advertises <code>token_endpoint_auth_methods_supported:
+[client_secret_basic, client_secret_post]</code> — <strong>no <code>none</code></strong> — so every 3LO client is
+confidential and redeeming an authorization code requires the app's <em>secret</em>. PKCE is
+supported (<code>S256</code>) but only as a challenge method, never in place of client
+authentication, and the device grant is disabled for 3LO apps. Shipping the secret to
+work around it is <a href="https://developer.atlassian.com/cloud/oauth/getting-started/managing-oauth-apps/">explicitly against Atlassian's
+guidance</a>,
+which says to distribute authorization URLs and never the secret.</p>
+<p>Registering your own app is <a href="https://community.developer.atlassian.com/t/oauth-2-0-with-proof-key-for-code-exchange-pkce/80173">Atlassian's own recommendation for distributed
+clients</a>.
+Public-client PKCE is tracked as <a href="https://jira.atlassian.com/browse/ECO-283">ECO-283</a>,
+still <em>Gathering Interest</em>. The symptom, if you try it anyway: the browser consent
+succeeds and the token exchange returns <code>401 Unauthorized</code>.</p>
+</div>
 <hr />
 <h2 id="what-you-are-about-to-create">What you are about to create<a class="headerlink" href="#what-you-are-about-to-create" title="Permanent link">&para;</a></h2>
 <p>An "OAuth 2.0 (3LO)" app in Atlassian's developer console. It is a registration, not a
@@ -811,7 +796,8 @@ several hundred entries and Atlassian caps an app at 50.</p>
 <p>The Jira API page has <strong>two sections with their own Edit buttons</strong>: <em>Jira platform REST API</em>
 and <em>Jira Service Management API</em>. Configuring the first and stopping is the easy mistake —
 every JSM command 403s and there is no hint as to why.</p>
-<p><code>atlassian auth login</code> requests all 26 by default, which is the full classic set:</p>
+<p><code>atlassian auth login</code> requests all 26 by default, which is the full classic set. Tick all of
+them unless you have a reason not to:</p>
 <table>
 <thead>
 <tr>
@@ -839,20 +825,21 @@ every JSM command 403s and there is no hint as to why.</p>
 <p class="admonition-title">Scopes are fixed once people start using the app</p>
 <p>Adding a scope later forces <strong>every existing user to re-consent</strong>. That is why the default
 is the whole set rather than a minimal one: the alternative is discovering the gap one
-403 at a time, in front of your users.</p>
+403 at a time. If the app is only ever used by you, this matters less — re-consenting is
+one browser round trip.</p>
 </div>
 <p>A wide scope list looks alarming and mostly isn't. A scope <strong>caps</strong> what the token may do; it
 never grants the person anything they don't already have. <code>manage:jira-configuration</code> held by
 someone who is not a Jira admin still cannot change a global setting.</p>
 <p>If you would rather show a smaller consent screen, request less — the app can register more
 than a given login asks for:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>atlassian<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span>--client-id<span class="w"> </span>&lt;id&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>--scopes<span class="w"> </span><span class="s1">&#39;read:jira-work read:jira-user read:confluence-content.all offline_access&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>atlassian<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span>--client-id<span class="w"> </span>&lt;id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>--scopes<span class="w"> </span><span class="s1">&#39;read:jira-work read:jira-user read:confluence-content.all offline_access&#39;</span>
 </code></pre></div>
 <h2 id="4-set-the-callback-url">4. Set the callback URL<a class="headerlink" href="#4-set-the-callback-url" title="Permanent link">&para;</a></h2>
 <p><strong>Authorization</strong> in the left menu → <strong>OAuth 2.0 (3LO)</strong> → <strong>Configure</strong>.</p>
 <p>Set the callback URL to exactly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>http://127.0.0.1:8990/callback
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>http://127.0.0.1:8990/callback
 </code></pre></div>
 <div class="admonition danger">
 <p class="admonition-title">It must match exactly</p>
@@ -864,22 +851,32 @@ rather than picking a free one per run. If 8990 is taken on your machine, use
 <p>Save.</p>
 <h2 id="5-copy-the-client-id">5. Copy the client id<a class="headerlink" href="#5-copy-the-client-id" title="Permanent link">&para;</a></h2>
 <p><strong>Settings</strong> in the left menu → copy the <strong>Client ID</strong>.</p>
-<p>The <strong>Secret</strong> on the same page is optional for this CLI: it uses PKCE, which is what makes a
-public client safe without one. Leave the secret prompt blank unless you have a reason.</p>
+<p>Copy the <strong>Secret</strong> from the same page too. It is not optional: Atlassian authenticates the
+client with it and accepts no substitute, so a login without it consents in the browser and
+then fails at the token exchange. The CLI stores it in your OS keyring alongside the tokens,
+never in the config file.</p>
 <h2 id="6-log-in">6. Log in<a class="headerlink" href="#6-log-in" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>atlassian<span class="w"> </span>init<span class="w"> </span>--name<span class="w"> </span>acme<span class="w"> </span>--base-url<span class="w"> </span>https://acme.atlassian.net<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span>--client-id<span class="w"> </span>&lt;your<span class="w"> </span>id&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>atlassian<span class="w"> </span>init<span class="w"> </span>--name<span class="w"> </span>acme<span class="w"> </span>--base-url<span class="w"> </span>https://acme.atlassian.net<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>--client-id<span class="w"> </span>&lt;your<span class="w"> </span>id&gt;
 </code></pre></div>
-<p>Leave <code>--client-id</code> off and it uses the built-in app. It prints the exact callback URL it will use, opens the authorize
-page, catches the redirect, exchanges the code with PKCE, resolves your site's cloud id, and
+<p>It prompts for the secret without echoing, prints the exact callback URL it will use, opens
+your browser, catches the redirect, exchanges the code, resolves your site's cloud id, and
 verifies the token against <code>/myself</code> before saving anything.</p>
+<p><code>--no-browser</code> prints the URL instead of opening one.</p>
 <p>On a machine with no browser:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>atlassian<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span>--client-id<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--mode<span class="w"> </span>oob
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>atlassian<span class="w"> </span>auth<span class="w"> </span>login<span class="w"> </span>--method<span class="w"> </span>oauth2<span class="w"> </span>--client-id<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--mode<span class="w"> </span>oob
 </code></pre></div>
 <p>That prints the URL for you to open elsewhere, then asks you to paste back the <code>code</code>
 parameter from the redirect.</p>
 <h2 id="7-sharing-it-with-other-people-optional">7. Sharing it with other people (optional)<a class="headerlink" href="#7-sharing-it-with-other-people-optional" title="Permanent link">&para;</a></h2>
-<p><strong>Distribution</strong> in the left menu → toggle sharing on. Users will see a warning that the app
-has not been reviewed by Atlassian until you take it through Marketplace review.</p>
+<p><strong>Distribution</strong> in the left menu → toggle sharing on, and supply a vendor name, privacy
+policy, terms and a personal-data declaration.</p>
+<p>Worth being clear about what this does and does not buy you: sharing lets other people
+<em>consent</em> to your app, but they still cannot complete a login without its <strong>secret</strong>, and
+handing that out is exactly what Atlassian tells you not to do. So sharing is for teams who
+will distribute the secret internally through their own secret management — not a way to
+publish a CLI that anyone can <code>brew install</code> and log into. For that, point people at
+<code>atlassian init</code> and an API token.</p>
 <hr />
 <h2 id="things-to-know-before-you-commit-to-oauth">Things to know before you commit to OAuth<a class="headerlink" href="#things-to-know-before-you-commit-to-oauth" title="Permanent link">&para;</a></h2>
 <p><strong>Refresh tokens rotate.</strong> Each use returns a new one and invalidates the previous. The CLI
@@ -930,6 +927,10 @@ developer account.</p>
 <tr>
 <td><code>invalid_scope</code> on the authorize page</td>
 <td>A scope was requested that the app does not register. Compare <code>--scopes</code> against <strong>Permissions</strong>.</td>
+</tr>
+<tr>
+<td>Consent succeeds, then <code>exchange authorization code: Unauthorized</code></td>
+<td>No client secret. Atlassian has no public-client mode; pass <code>--client-secret</code>.</td>
 </tr>
 <tr>
 <td>Works for an hour, then fails</td>

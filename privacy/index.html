@@ -724,15 +724,15 @@ Nothing you do with it is transmitted to, collected by, or stored by its author.
   through Atlassian's own API.</li>
 </ul>
 <h2 id="oauth-consent">OAuth consent<a class="headerlink" href="#oauth-consent" title="Permanent link">&para;</a></h2>
-<p><code>atlassian auth login --method oauth2</code> uses an Atlassian OAuth app registered by this
-project. That app is an identifier used to request consent; it is not a service, and it
-receives no data. The resulting token is issued by Atlassian directly to your machine and
-stored in your keyring.</p>
+<p><code>atlassian auth login --method oauth2</code> uses an OAuth app <strong>you</strong> register in Atlassian's
+developer console — this project ships no app and no credentials of its own, because
+Atlassian requires a client secret and does not permit distributing one. The resulting token
+is issued by Atlassian directly to your machine and stored in your keyring. Nothing about the
+consent reaches this project's author.</p>
 <p>The token can do only what the requested scopes allow <strong>and</strong> what your own Atlassian
 account already permits — a scope never grants you access you did not already have.</p>
 <p>Revoke consent at any time at
-<a href="https://id.atlassian.com/manage-profile/apps">id.atlassian.com/manage-profile/apps</a>. To
-avoid this project's app entirely, register your own and pass <code>--client-id</code>.</p>
+<a href="https://id.atlassian.com/manage-profile/apps">id.atlassian.com/manage-profile/apps</a>.</p>
 <h2 id="children">Children<a class="headerlink" href="#children" title="Permanent link">&para;</a></h2>
 <p>Not directed at children, and it collects nothing from anyone.</p>
 <h2 id="changes">Changes<a class="headerlink" href="#changes" title="Permanent link">&para;</a></h2>

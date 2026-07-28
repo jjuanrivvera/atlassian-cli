@@ -704,22 +704,20 @@
 <h1 id="terms-of-service">Terms of service<a class="headerlink" href="#terms-of-service" title="Permanent link">&para;</a></h1>
 <p><strong>atlassian CLI</strong> — last updated 28 July 2026.</p>
 <h2 id="what-this-covers">What this covers<a class="headerlink" href="#what-this-covers" title="Permanent link">&para;</a></h2>
-<p>The <code>atlassian</code> command-line program and its OAuth application registration. The software
-itself is licensed under the
+<p>The <code>atlassian</code> command-line program. It is licensed under the
 <a href="https://github.com/jjuanrivvera/atlassian-cli/blob/main/LICENSE">MIT License</a>, which governs
-your use of the code; these terms cover the OAuth app and the project's obligations to you.</p>
+your use of the code; these terms state the project's obligations to you alongside it.</p>
 <p>Using the program means accepting both.</p>
 <h2 id="what-you-get">What you get<a class="headerlink" href="#what-you-get" title="Permanent link">&para;</a></h2>
-<p>Permission to use the program for any purpose, commercial or otherwise, per the MIT License,
-including the use of this project's registered OAuth application to obtain your own Atlassian
-tokens.</p>
+<p>Permission to use the program for any purpose, commercial or otherwise, per the MIT License.</p>
+<p>The program ships no credentials. Authentication uses either your own Atlassian API token or
+an OAuth app you register yourself, so there is no shared service between you and anyone
+else.</p>
 <h2 id="what-is-asked-of-you">What is asked of you<a class="headerlink" href="#what-is-asked-of-you" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Use it only against Atlassian instances you are authorised to access.</li>
 <li>Follow Atlassian's own terms and API policies. This program is a client; it does not widen
   what you are permitted to do, and your account's permissions still apply to every call.</li>
-<li>Do not use the shared OAuth app registration to build a different product. Register your
-  own — it is free, and <code>--client-id</code> exists for exactly this.</li>
 <li>Do not use it to place unreasonable load on Atlassian's API. The program honours
   <code>Retry-After</code> and adapts to rate-limit headers; do not work around that.</li>
 </ul>
@@ -734,10 +732,9 @@ when stdin is not a terminal; <code>--dry-run</code> shows exactly what would be
 other liability — including lost or corrupted data, lost profits, or business interruption —
 arising from the software or its use, whether in contract, tort or otherwise.</p>
 <h2 id="availability">Availability<a class="headerlink" href="#availability" title="Permanent link">&para;</a></h2>
-<p>Provided on a best-effort basis with no uptime or support commitment. The OAuth app
-registration may be changed or withdrawn — if that happens, API-token authentication
-(<code>atlassian init</code>) continues to work unaffected, and you can register your own app and pass
-<code>--client-id</code>.</p>
+<p>Provided on a best-effort basis with no uptime or support commitment. There is no hosted
+component that can go down: the program runs entirely on your machine and talks to your own
+Atlassian instance.</p>
 <p>Support is community best-effort through
 <a href="https://github.com/jjuanrivvera/atlassian-cli/issues">GitHub issues</a>.</p>
 <h2 id="not-affiliated-with-atlassian">Not affiliated with Atlassian<a class="headerlink" href="#not-affiliated-with-atlassian" title="Permanent link">&para;</a></h2>

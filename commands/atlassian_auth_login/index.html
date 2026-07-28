@@ -532,22 +532,25 @@
 <p>Capture a credential, store it in the OS keyring, and verify it against the API before
 saving — so a typo fails here rather than on the next command.</p>
 <p>The token is read without echoing when the terminal is interactive; pass --token to script it.</p>
-<p>--method oauth2 needs no setup: it uses this CLI's own registered app, opens your browser for
-consent, and catches the redirect on http://127.0.0.1:8990/callback. Consent is per user and
-per site, and you can revoke it at any time at https://id.atlassian.com/manage-profile/apps.</p>
-<p>Pass --client-id to consent through your own app instead — for your own audit trail, or to be
-free of this app's rate limits. Register it with that same callback URL: Atlassian matches it
-exactly and supports no wildcard port, which is why the port is fixed rather than chosen per
-run. Use --port if something else holds it (and register the matching URL), or --mode oob to
-paste the code by hand on a machine with no browser.</p>
+<p>--method oauth2 needs an app you registered at https://developer.atlassian.com/console/myapps/,
+and both its client id and its secret. Atlassian has no public-client mode — PKCE is used but
+does not replace the secret — so there is no built-in app to borrow. An API token needs no app
+at all and is the simpler choice unless you specifically want per-user consent and revocation.</p>
+<p>Register the app's callback URL as exactly:</p>
+<div class="highlight"><pre><span></span><code>http://127.0.0.1:8990/callback
+</code></pre></div>
+<p>Atlassian matches that exactly and supports no wildcard port, which is why the port is fixed
+rather than chosen per run. It opens your browser automatically and catches the redirect
+there; revoke the consent later at https://id.atlassian.com/manage-profile/apps. Use --port if
+something else holds the port (and register the matching URL), --no-browser to print the URL
+instead of opening it, or --mode oob to paste the code by hand where no browser is reachable.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>atlassian auth login [flags]
 </code></pre></div>
 <h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>atlassian auth login                        # Cloud: email + API token
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  atlassian auth login --method pat           # Data Center: personal access token
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  atlassian auth login --method oauth2        # Cloud: OAuth 2.0 (3LO), no app setup
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  atlassian auth login --method oauth2 --client-id &lt;id&gt;   # ...through your own app
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  atlassian auth login --email me@example.com --token &quot;$ATLASSIAN_API_TOKEN&quot;
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  atlassian auth login --method oauth2 --client-id &lt;id&gt; --client-secret &lt;secret&gt;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  atlassian auth login --email me@example.com --token &quot;$ATLASSIAN_API_TOKEN&quot;
 </code></pre></div>
 <h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>      --client-id string       OAuth client id (defaults to this CLI&#39;s own registered app)
@@ -556,9 +559,10 @@ paste the code by hand on a machine with no browser.</p>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  -h, --help                   help for login
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>      --method string          auth method: basic|pat|oauth2
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>      --mode string            OAuth redirect handling: auto|local|oob (default &quot;auto&quot;)
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>      --port int               loopback port for the OAuth redirect — must match the callback URL registered on the app (default 8990)
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>      --scopes string          OAuth scopes to request (default &quot;read:jira-work write:jira-work read:jira-user manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider read:servicedesk-request write:servicedesk-request manage:servicedesk-customer read:servicemanagement-insight-objects read:confluence-content.all read:confluence-content.summary write:confluence-content read:confluence-space.summary write:confluence-space write:confluence-file read:confluence-props write:confluence-props read:confluence-content.permission read:confluence-user read:confluence-groups write:confluence-groups search:confluence manage:confluence-configuration readonly:content.attachment:confluence offline_access&quot;)
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>      --token string           API token or personal access token (prompted if omitted)
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>      --no-browser             print the authorize URL instead of opening a browser
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>      --port int               loopback port for the OAuth redirect — must match the callback URL registered on the app (default 8990)
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>      --scopes string          OAuth scopes to request (default &quot;read:jira-work write:jira-work read:jira-user manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider read:servicedesk-request write:servicedesk-request manage:servicedesk-customer read:servicemanagement-insight-objects read:confluence-content.all read:confluence-content.summary write:confluence-content read:confluence-space.summary write:confluence-space write:confluence-file read:confluence-props write:confluence-props read:confluence-content.permission read:confluence-user read:confluence-groups write:confluence-groups search:confluence manage:confluence-configuration readonly:content.attachment:confluence offline_access&quot;)
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>      --token string           API token or personal access token (prompted if omitted)
 </code></pre></div>
 <h3 id="options-inherited-from-parent-commands">Options inherited from parent commands<a class="headerlink" href="#options-inherited-from-parent-commands" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>      --base-url string   override the site&#39;s base URL
