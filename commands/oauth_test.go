@@ -200,19 +200,22 @@ func TestResolveCloudID_SingleSiteIsUnambiguous(t *testing.T) {
 	assert.Equal(t, "only", got)
 }
 
-func TestDefaultOAuthClientIDIsSetAndPublic(t *testing.T) {
-	// The CLI ships its own registered app so `auth login --method oauth2` needs no
-	// developer-console setup. Under authorization-code + PKCE the client id is a public
-	// identifier — it travels in the browser URL of every login — so this is not a secret
-	// leaking into the binary, and no client secret may accompany it.
-	assert.NotEmpty(t, DefaultOAuthClientID)
-	assert.NotContains(t, defaultOAuthScopes, DefaultOAuthClientID)
-
-	// A login that falls back to the built-in app must not ask for a secret it cannot have.
+func TestNoOAuthCredentialIsBakedIntoTheBinary(t *testing.T) {
+	// Atlassian's token endpoint advertises only client_secret_basic and client_secret_post,
+	// so every 3LO client is confidential and a shipped client id would be useless without a
+	// shipped secret — which their guidance forbids. OAuth is therefore bring-your-own-app,
+	// and neither flag may acquire a default: a non-empty one would either leak a credential
+	// or send every user through a login that authorizes and then fails at the exchange.
 	login := newAuthLoginCmd(&globalOptions{})
-	require.NotNil(t, login.Flags().Lookup("client-secret"))
-	assert.Equal(t, "", login.Flags().Lookup("client-secret").DefValue,
-		"the built-in app is a public client; a default secret would be a real leak")
+	for _, name := range []string{"client-id", "client-secret"} {
+		f := login.Flags().Lookup(name)
+		require.NotNil(t, f, "--%s must exist: it is the only way to authenticate with OAuth", name)
+		assert.Equal(t, "", f.DefValue, "--%s must have no default", name)
+	}
+
+	// The help has to say an app is required, or the first failure is a browser consent that
+	// succeeds followed by an exchange that does not.
+	assert.Contains(t, login.Long, "developer.atlassian.com/console/myapps")
 }
 
 func TestDefaultOAuthScopesMatchTheAppRegistration(t *testing.T) {
@@ -271,13 +274,10 @@ func TestOAuthRedirectURIIsStable(t *testing.T) {
 	require.NotNil(t, portFlag, "--port must exist so a busy default can be moved")
 	assert.Equal(t, "8990", portFlag.DefValue)
 
-	// Anyone registering their own app has to reproduce this URL exactly, so the help has to
-	// state it. (It no longer needs to name the developer console: the built-in app means the
-	// default path never visits it, and --client-id is documented for the case that does.)
+	// Everyone using OAuth registers their own app, and has to reproduce this URL exactly on
+	// it, so the help has to state it verbatim.
 	assert.Contains(t, login.Long, "http://127.0.0.1:8990/callback")
-	assert.Contains(t, login.Long, "--client-id")
 
-	// Revocation is the counterweight to shipping a shared app: a user who consents through
-	// it must be told, at the point of consent, how to take that consent back.
+	// A consent the user cannot find their way back to is a consent they cannot withdraw.
 	assert.Contains(t, login.Long, "id.atlassian.com/manage-profile/apps")
 }

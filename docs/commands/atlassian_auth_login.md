@@ -9,15 +9,20 @@ saving — so a typo fails here rather than on the next command.
 
 The token is read without echoing when the terminal is interactive; pass --token to script it.
 
---method oauth2 needs no setup: it uses this CLI's own registered app, opens your browser for
-consent, and catches the redirect on http://127.0.0.1:8990/callback. Consent is per user and
-per site, and you can revoke it at any time at https://id.atlassian.com/manage-profile/apps.
+--method oauth2 needs an app you registered at https://developer.atlassian.com/console/myapps/,
+and both its client id and its secret. Atlassian has no public-client mode — PKCE is used but
+does not replace the secret — so there is no built-in app to borrow. An API token needs no app
+at all and is the simpler choice unless you specifically want per-user consent and revocation.
 
-Pass --client-id to consent through your own app instead — for your own audit trail, or to be
-free of this app's rate limits. Register it with that same callback URL: Atlassian matches it
-exactly and supports no wildcard port, which is why the port is fixed rather than chosen per
-run. Use --port if something else holds it (and register the matching URL), or --mode oob to
-paste the code by hand on a machine with no browser.
+Register the app's callback URL as exactly:
+
+    http://127.0.0.1:8990/callback
+
+Atlassian matches that exactly and supports no wildcard port, which is why the port is fixed
+rather than chosen per run. It opens your browser automatically and catches the redirect
+there; revoke the consent later at https://id.atlassian.com/manage-profile/apps. Use --port if
+something else holds the port (and register the matching URL), --no-browser to print the URL
+instead of opening it, or --mode oob to paste the code by hand where no browser is reachable.
 
 ```
 atlassian auth login [flags]
@@ -28,8 +33,7 @@ atlassian auth login [flags]
 ```
 atlassian auth login                        # Cloud: email + API token
   atlassian auth login --method pat           # Data Center: personal access token
-  atlassian auth login --method oauth2        # Cloud: OAuth 2.0 (3LO), no app setup
-  atlassian auth login --method oauth2 --client-id <id>   # ...through your own app
+  atlassian auth login --method oauth2 --client-id <id> --client-secret <secret>
   atlassian auth login --email me@example.com --token "$ATLASSIAN_API_TOKEN"
 ```
 
@@ -42,6 +46,7 @@ atlassian auth login                        # Cloud: email + API token
   -h, --help                   help for login
       --method string          auth method: basic|pat|oauth2
       --mode string            OAuth redirect handling: auto|local|oob (default "auto")
+      --no-browser             print the authorize URL instead of opening a browser
       --port int               loopback port for the OAuth redirect — must match the callback URL registered on the app (default 8990)
       --scopes string          OAuth scopes to request (default "read:jira-work write:jira-work read:jira-user manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider read:servicedesk-request write:servicedesk-request manage:servicedesk-customer read:servicemanagement-insight-objects read:confluence-content.all read:confluence-content.summary write:confluence-content read:confluence-space.summary write:confluence-space write:confluence-file read:confluence-props write:confluence-props read:confluence-content.permission read:confluence-user read:confluence-groups write:confluence-groups search:confluence manage:confluence-configuration readonly:content.attachment:confluence offline_access")
       --token string           API token or personal access token (prompted if omitted)

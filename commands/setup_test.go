@@ -65,6 +65,37 @@ func TestInit_SkipLogin(t *testing.T) {
 	assert.Contains(t, out, "Next: atlassian auth login")
 }
 
+func TestAuthLogin_OAuthRefusesWithoutAClientSecret(t *testing.T) {
+	withMock(t)
+	withMockKeyring(t)
+	require.NoError(t, os.Unsetenv("ATLASSIAN_API_TOKEN"))
+
+	// Atlassian's token endpoint offers only client_secret_basic and client_secret_post, so a
+	// secretless OAuth login is not a degraded login — it opens a browser, takes the user
+	// through a real consent screen, and only then dies at the exchange with a bare 401.
+	// Refusing up front is the difference between a one-line fix and a mystery.
+	_, _, err := run(t, "auth", "login", "--method", "oauth2", "--client-id", "public-client-id")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "client secret")
+	assert.NotContains(t, err.Error(), "exchange authorization code",
+		"it must refuse before the browser round trip, not after")
+}
+
+func TestAuthLogin_OAuthPromptsForAClientID(t *testing.T) {
+	withMock(t)
+	withMockKeyring(t)
+	require.NoError(t, os.Unsetenv("ATLASSIAN_API_TOKEN"))
+
+	// With no --client-id and nothing stored on the site, the prompt is the only way to supply
+	// one. Feeding an empty line must produce the "register an app" error rather than an
+	// attempt to authorize with a blank client.
+	_, errOut, err := run(t, "auth", "login", "--method", "oauth2")
+	require.Error(t, err)
+	assert.Contains(t, errOut, "developer.atlassian.com/console/myapps",
+		"the prompt must say where a client id comes from")
+	assert.Contains(t, err.Error(), "client id")
+}
+
 func TestInit_ForwardsOAuthFlagsToLogin(t *testing.T) {
 	// init does not implement login; it re-enters `auth login` with a hand-built flag list.
 	// Every name in that list has to exist on both commands, or the flow dies with "unknown
