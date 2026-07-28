@@ -328,3 +328,46 @@ func TestParseLimit(t *testing.T) {
 	_, err = ParseLimit("abc")
 	require.Error(t, err)
 }
+
+func TestDecodePage_ResourceNamedItemArrays(t *testing.T) {
+	// Atlassian does not settle on one key for the item array. An unrecognized name does not
+	// error — it decodes to an empty page, which is indistinguishable from "there are none".
+	// That is exactly how `issues comments` silently returned nothing on every issue.
+	cases := map[string]string{
+		"comments":   `{"startAt":0,"maxResults":1,"total":1,"comments":[{"id":"1"}]}`,
+		"worklogs":   `{"startAt":0,"maxResults":1,"total":1,"worklogs":[{"id":"1"}]}`,
+		"dashboards": `{"startAt":0,"maxResults":1,"total":1,"dashboards":[{"id":"1"}]}`,
+		"values":     `{"startAt":0,"total":1,"values":[{"id":"1"}]}`,
+		"issues":     `{"issues":[{"id":"1"}]}`,
+		"results":    `{"results":[{"id":"1"}]}`,
+		"groups":     `{"groups":[{"name":"g"}]}`,
+	}
+	for key, body := range cases {
+		t.Run(key, func(t *testing.T) {
+			got, err := decodePage([]byte(body), PageOffset, "", 0)
+			require.NoError(t, err)
+			assert.Lenf(t, got.items, 1, "the %q array should have decoded", key)
+		})
+	}
+}
+
+func TestDecodePage_FallsBackToTheSoleObjectArray(t *testing.T) {
+	// An endpoint whose item key this package does not name still yields its items, provided
+	// there is exactly one candidate.
+	got, err := decodePage([]byte(`{"startAt":0,"total":1,"somethingElse":[{"id":"1"}]}`), PageOffset, "", 0)
+	require.NoError(t, err)
+	assert.Len(t, got.items, 1)
+}
+
+func TestDecodePage_FallbackStaysDeterministic(t *testing.T) {
+	// Two candidate arrays is ambiguous. Guessing would make the result depend on map
+	// iteration order, so an ambiguous body decodes to empty rather than to a coin flip.
+	got, err := decodePage([]byte(`{"alpha":[{"id":"1"}],"beta":[{"id":"2"}]}`), PageOffset, "", 0)
+	require.NoError(t, err)
+	assert.Empty(t, got.items)
+
+	// Arrays of strings are not item arrays — `errorMessages` and `expand` must not be picked.
+	got, err = decodePage([]byte(`{"errorMessages":["nope"],"items":[{"id":"1"}]}`), PageOffset, "", 0)
+	require.NoError(t, err)
+	assert.Len(t, got.items, 1)
+}

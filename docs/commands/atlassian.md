@@ -78,6 +78,7 @@ sending anything.
 * [atlassian issues](atlassian_issues)	 - Work with Jira issues
 * [atlassian mcp](atlassian_mcp)	 - MCP server management
 * [atlassian op](atlassian_op)	 - Discover and call any documented Atlassian operation
+* [atlassian open](atlassian_open)	 - Open something in the browser
 * [atlassian organizations](atlassian_organizations)	 - Work with Jira Service Management organizations
 * [atlassian page-attachments](atlassian_page-attachments)	 - List Confluence attachments
 * [atlassian page-comments](atlassian_page-comments)	 - Work with Confluence footer comments

@@ -56,6 +56,7 @@ func newAuthLoginCmd(o *globalOptions) *cobra.Command {
 		secret   string
 		mode     string
 		scopes   string
+		port     int
 	)
 
 	cmd := &cobra.Command{
@@ -65,11 +66,22 @@ func newAuthLoginCmd(o *globalOptions) *cobra.Command {
 Capture a credential, store it in the OS keyring, and verify it against the API before
 saving — so a typo fails here rather than on the next command.
 
-The token is read without echoing when the terminal is interactive; pass --token to script it.`),
+The token is read without echoing when the terminal is interactive; pass --token to script it.
+
+--method oauth2 needs no setup: it uses this CLI's own registered app, opens your browser for
+consent, and catches the redirect on http://127.0.0.1:8990/callback. Consent is per user and
+per site, and you can revoke it at any time at https://id.atlassian.com/manage-profile/apps.
+
+Pass --client-id to consent through your own app instead — for your own audit trail, or to be
+free of this app's rate limits. Register it with that same callback URL: Atlassian matches it
+exactly and supports no wildcard port, which is why the port is fixed rather than chosen per
+run. Use --port if something else holds it (and register the matching URL), or --mode oob to
+paste the code by hand on a machine with no browser.`),
 		Example: strings.TrimSpace(`
-  atlassian auth login                                   # Cloud: email + API token
-  atlassian auth login --method pat                      # Data Center: personal access token
-  atlassian auth login --method oauth2 --client-id <id>  # Cloud: OAuth 2.0 (3LO)
+  atlassian auth login                        # Cloud: email + API token
+  atlassian auth login --method pat           # Data Center: personal access token
+  atlassian auth login --method oauth2        # Cloud: OAuth 2.0 (3LO), no app setup
+  atlassian auth login --method oauth2 --client-id <id>   # ...through your own app
   atlassian auth login --email me@example.com --token "$ATLASSIAN_API_TOKEN"`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, err := config.Load()
@@ -134,22 +146,21 @@ The token is read without echoing when the terminal is interactive; pass --token
 					clientID = site.ClientID
 				}
 				if clientID == "" {
-					clientID, err = promptLine(cmd, "OAuth client id: ")
-					if err != nil {
-						return err
-					}
+					clientID = DefaultOAuthClientID
 				}
 				if clientID == "" {
 					return fmt.Errorf("an OAuth client id is required (create an app at https://developer.atlassian.com/console/myapps/)")
 				}
-				if secret == "" {
+				// A public client has no secret to prompt for. Asking anyway taught the first
+				// users that they were missing something they had to go and find.
+				if secret == "" && clientID != DefaultOAuthClientID {
 					secret, err = promptSecret(cmd, "OAuth client secret (blank for a public client): ")
 					if err != nil {
 						return err
 					}
 				}
 				tok, err := runOAuthFlow(cmd, oauthParams{
-					ClientID: clientID, ClientSecret: secret, Mode: mode, Scopes: scopes,
+					ClientID: clientID, ClientSecret: secret, Mode: mode, Scopes: scopes, Port: port,
 				})
 				if err != nil {
 					return err
@@ -203,9 +214,11 @@ The token is read without echoing when the terminal is interactive; pass --token
 	cmd.Flags().StringVar(&method, "method", "", "auth method: basic|pat|oauth2")
 	cmd.Flags().StringVar(&email, "email", "", "account email (basic auth)")
 	cmd.Flags().StringVar(&token, "token", "", "API token or personal access token (prompted if omitted)")
-	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id")
+	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id (defaults to this CLI's own registered app)")
 	cmd.Flags().StringVar(&secret, "client-secret", "", "OAuth client secret")
 	cmd.Flags().StringVar(&mode, "mode", "auto", "OAuth redirect handling: auto|local|oob")
+	cmd.Flags().IntVar(&port, "port", DefaultOAuthPort,
+		"loopback port for the OAuth redirect — must match the callback URL registered on the app")
 	cmd.Flags().StringVar(&scopes, "scopes", defaultOAuthScopes, "OAuth scopes to request")
 	annotate(cmd, kindWrite)
 	cmd.Annotations["atlassianLocal"] = "true"
@@ -360,17 +373,59 @@ func resolveCloudID(ctx context.Context, accessToken, baseURL string) (string, e
 	return "", fmt.Errorf("no accessible site matches %s (token can reach: %s)", baseURL, strings.Join(names, ", "))
 }
 
-// defaultOAuthScopes covers read and write across Jira and Confluence, plus offline_access
-// for the refresh token — without offline_access the grant expires in an hour and every
-// subsequent command would fail.
+// DefaultOAuthPort is the loopback port the redirect listener binds by default. It is fixed
+// because it forms part of the redirect_uri registered on the Atlassian app.
+const DefaultOAuthPort = 8990
+
+// DefaultOAuthClientID is this CLI's own registered Atlassian app, so that `auth login
+// --method oauth2` works with no developer-console setup at all.
+//
+// Publishing it is not a leak. In an authorization-code + PKCE flow the client id is a public
+// identifier, not a credential: it is sent in the browser URL of every login, and possession
+// of it grants nothing. What protects the exchange is the PKCE verifier, which never leaves
+// the machine, plus the registered redirect_uri — Atlassian will only ever redirect to
+// 127.0.0.1 on the ports below, so a token minted with this id can only land back on the
+// user's own loopback interface.
+//
+// Consent is still per user and per site, and revocable by them at any time from
+// id.atlassian.com. Anyone who would rather consent through their own app — for their own
+// audit trail, or to be free of this app's rate limits — passes --client-id.
+const DefaultOAuthClientID = "tY1ReDA2lPorOmh9BcLmBxqm1v8i9oDc"
+
+// defaultOAuthScopes is every classic scope across the four products, plus offline_access.
+//
+// It is deliberately the full set rather than a read-only or Jira-only subset. A scope the
+// app did not request is not merely degraded — the call 403s, and the fix is a re-consent by
+// every user of the app, because Atlassian freezes the granted set at consent time. Since
+// this CLI's premise is that all 1,143 documented operations are reachable, a narrower
+// default would mean discovering the gap one endpoint at a time in front of users.
+//
+// A scope caps what the token may do; it never grants the human anything they do not already
+// have. manage:jira-configuration held by a non-admin still cannot change global settings.
+// Anyone who wants a smaller consent screen passes --scopes.
+//
+// Classic scopes are used throughout: the granular equivalents would run to several hundred
+// entries, and Atlassian caps an app at 50.
 const defaultOAuthScopes = "read:jira-work write:jira-work read:jira-user " +
-	"read:confluence-content.all write:confluence-content offline_access"
+	"manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider " +
+	"read:servicedesk-request write:servicedesk-request manage:servicedesk-customer " +
+	"read:servicemanagement-insight-objects " +
+	"read:confluence-content.all read:confluence-content.summary write:confluence-content " +
+	"read:confluence-space.summary write:confluence-space write:confluence-file " +
+	"read:confluence-props write:confluence-props read:confluence-content.permission " +
+	"read:confluence-user read:confluence-groups write:confluence-groups " +
+	"search:confluence manage:confluence-configuration " +
+	"readonly:content.attachment:confluence " +
+	"offline_access"
 
 type oauthParams struct {
 	ClientID     string
 	ClientSecret string
 	Mode         string
 	Scopes       string
+	// Port is the loopback port the redirect listener binds. It is part of the redirect_uri
+	// the user registers on the app, so it must not vary between runs.
+	Port int
 }
 
 type oauthToken struct {
@@ -405,15 +460,20 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 		srv         *http.Server
 	)
 	if mode == "auto" || mode == "local" {
-		ln, err := net.Listen("tcp", "127.0.0.1:0")
+		// A FIXED port, deliberately. Atlassian matches redirect_uri against the callback URL
+		// registered on the app, exactly, and supports no wildcard or variable port. An
+		// ephemeral port would therefore produce a different redirect_uri on every run and be
+		// rejected every time — so the port is stable and printed, and the user registers it
+		// once. --port moves it if something else already holds that address.
+		ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", p.Port))
 		if err != nil {
 			if mode == "local" {
-				return nil, fmt.Errorf("start local redirect listener: %w", err)
+				return nil, fmt.Errorf("cannot listen on 127.0.0.1:%d for the OAuth redirect: %w\n\npass --port to use a different one (and register that callback URL on the app), or --mode oob to paste the code instead", p.Port, err)
 			}
+			fmt.Fprintf(cmd.ErrOrStderr(), "note: 127.0.0.1:%d is unavailable, falling back to paste-the-code mode\n", p.Port)
 			mode = "oob"
 		} else {
-			port := ln.Addr().(*net.TCPAddr).Port
-			redirectURI = fmt.Sprintf("http://127.0.0.1:%d/callback", port)
+			redirectURI = fmt.Sprintf("http://127.0.0.1:%d/callback", p.Port)
 			codeCh = make(chan string, 1)
 			srv = startCallbackServer(ln, state, codeCh)
 			defer func() {
@@ -446,7 +506,9 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 		"code_challenge_method": {"S256"},
 	}.Encode()
 
-	fmt.Fprintf(cmd.ErrOrStderr(), "\nOpen this URL to authorize:\n\n  %s\n\n", authURL)
+	fmt.Fprintf(cmd.ErrOrStderr(),
+		"\nThe app's registered callback URL must be exactly:\n\n  %s\n\nOpen this URL to authorize:\n\n  %s\n\n",
+		redirectURI, authURL)
 
 	var code string
 	if mode == "local" {

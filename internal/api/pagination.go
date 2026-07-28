@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -79,11 +80,18 @@ type page struct {
 // envelope models the union of every list wrapper Atlassian returns. Only the fields present
 // in a given response decode; the rest stay zero.
 type envelope struct {
-	// Item arrays, by the key each product uses.
-	Values  []json.RawMessage `json:"values"`  // Jira platform, Agile, Confluence v2, JSM
-	Issues  []json.RawMessage `json:"issues"`  // Jira search
-	Results []json.RawMessage `json:"results"` // Confluence v1 search/content
-	Groups  []json.RawMessage `json:"groups"`  // Jira group picker
+	// Item arrays, by the key each endpoint uses. Atlassian does not settle on one: most
+	// collections use `values`, but several name the array after the resource. An
+	// unrecognized key does NOT error — it decodes to an empty page, which is
+	// indistinguishable from "there are none". That is how `issues comments` silently
+	// returned nothing on every issue.
+	Values     []json.RawMessage `json:"values"`     // most Jira/Agile/JSM/Confluence v2 collections
+	Issues     []json.RawMessage `json:"issues"`     // Jira search, board/sprint issues
+	Results    []json.RawMessage `json:"results"`    // Confluence v1 search and content
+	Groups     []json.RawMessage `json:"groups"`     // Jira group picker
+	Comments   []json.RawMessage `json:"comments"`   // issue comments
+	Worklogs   []json.RawMessage `json:"worklogs"`   // issue worklogs
+	Dashboards []json.RawMessage `json:"dashboards"` // dashboard list
 
 	// Continuation signals.
 	StartAt       *int   `json:"startAt"`
@@ -123,7 +131,15 @@ func decodePage(body []byte, style PageStyle, sentCursor string, limit int) (pag
 		return page{}, fmt.Errorf("decode list: %w", err)
 	}
 
-	p := page{items: firstNonNil(env.Values, env.Issues, env.Results, env.Groups)}
+	p := page{items: firstNonNil(env.Values, env.Issues, env.Results, env.Groups,
+		env.Comments, env.Worklogs, env.Dashboards)}
+	if p.items == nil {
+		// A collection whose array is named after something else entirely. Rather than
+		// returning an empty page — which reads as "no results" — fall back to the sole
+		// array-of-objects property, when there is exactly one. Requiring uniqueness keeps
+		// this deterministic: an ambiguous body still decodes to empty rather than guessing.
+		p.items = soleObjectArray(body)
+	}
 	if env.Total != nil {
 		p.total = *env.Total
 	} else if env.Size != nil {
@@ -214,6 +230,37 @@ func queryParamFromLink(link, param string) string {
 		return ""
 	}
 	return q.Get(param)
+}
+
+// soleObjectArray returns the one array-of-objects property in a JSON object, if exactly one
+// exists. It is the safety net for endpoints whose item key this package does not name.
+func soleObjectArray(body []byte) []json.RawMessage {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(body, &raw); err != nil {
+		return nil
+	}
+	var found []json.RawMessage
+	matches := 0
+	for _, v := range raw {
+		trimmed := bytes.TrimSpace(v)
+		if len(trimmed) == 0 || trimmed[0] != '[' {
+			continue
+		}
+		var items []json.RawMessage
+		if err := json.Unmarshal(trimmed, &items); err != nil {
+			continue
+		}
+		// Only arrays of objects: `errorMessages` and `expand` lists are arrays of strings.
+		if len(items) > 0 && bytes.TrimSpace(items[0])[0] != '{' {
+			continue
+		}
+		matches++
+		found = items
+	}
+	if matches != 1 {
+		return nil
+	}
+	return found
 }
 
 func firstNonNil(lists ...[]json.RawMessage) []json.RawMessage {

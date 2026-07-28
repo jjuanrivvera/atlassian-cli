@@ -17,7 +17,24 @@ atlassian auth login --method oauth2 --client-id <id>   # Cloud OAuth
 ```
 
 Cloud API tokens: <https://id.atlassian.com/manage-profile/security/api-tokens>.
-OAuth apps: <https://developer.atlassian.com/console/myapps/>.
+
+### OAuth specifics
+
+OAuth needs an app registered at <https://developer.atlassian.com/console/myapps/> with its
+**callback URL set to exactly** `http://127.0.0.1:8990/callback`. Atlassian matches the
+redirect URI exactly and supports no wildcard or variable port, which is why the CLI binds a
+fixed port rather than picking one per run. `--port` moves it (register the matching URL);
+`--mode oob` prints the code for you to paste, for a machine with no browser.
+
+The default scopes include `offline_access`, without which Atlassian issues no refresh token
+and the grant dies after one hour. Refresh tokens **rotate**: each use returns a new one and
+invalidates the old, so the CLI writes the new token back to the keyring on every refresh.
+One consequence worth knowing: two long-lived processes sharing one site (say two `mcp start`
+servers) can invalidate each other's refresh token, since only the most recent one is valid.
+
+Under OAuth, requests are routed through `api.atlassian.com/ex/jira/{cloudId}` and
+`.../ex/confluence/{cloudId}` rather than your site host. The cloud id is resolved once at
+login and cached in the config.
 
 Login **verifies before saving**, so a typo fails at login rather than on the next command.
 

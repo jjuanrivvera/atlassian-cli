@@ -65,6 +65,19 @@ func TestInit_SkipLogin(t *testing.T) {
 	assert.Contains(t, out, "Next: atlassian auth login")
 }
 
+func TestInit_ForwardsOAuthFlagsToLogin(t *testing.T) {
+	// init does not implement login; it re-enters `auth login` with a hand-built flag list.
+	// Every name in that list has to exist on both commands, or the flow dies with "unknown
+	// flag" — on init, before anything is attempted, and on login, after the user has already
+	// answered every prompt.
+	initCmd := newInitCmd(&globalOptions{})
+	loginCmd := newAuthLoginCmd(&globalOptions{})
+	for _, name := range []string{"method", "email", "token", "client-id", "scopes"} {
+		assert.NotNil(t, initCmd.Flags().Lookup(name), "init must accept --%s", name)
+		assert.NotNil(t, loginCmd.Flags().Lookup(name), "auth login must accept --%s for init to forward it", name)
+	}
+}
+
 func TestInit_RejectsCleartextRemoteURL(t *testing.T) {
 	isolateHome(t)
 	// An API token over plain http to a remote host is a disclosed credential.
@@ -483,4 +496,46 @@ func TestDoctor_FailsWithoutCredentials(t *testing.T) {
 func TestValidateOutputFormat(t *testing.T) {
 	require.NoError(t, validateOutputFormat("json"))
 	require.Error(t, validateOutputFormat("xml"))
+}
+
+func TestBrowseURL(t *testing.T) {
+	const base = "https://acme.atlassian.net"
+	cases := map[string]string{
+		"":         base,
+		"PP-1071":  base + "/browse/PP-1071",
+		"pp-1071":  base + "/browse/pp-1071",
+		"AL4PE-12": base + "/browse/AL4PE-12",
+		"123456":   base + "/wiki/pages/123456",
+		"PP":       base + "/jira/software/projects/PP/boards",
+		"pp":       base + "/jira/software/projects/PP/boards",
+	}
+	for in, want := range cases {
+		assert.Equalf(t, want, browseURL(base, in), "browseURL(%q)", in)
+	}
+}
+
+func TestIsIssueKey(t *testing.T) {
+	for _, s := range []string{"PP-1", "AL4PE-1071", "a1-2"} {
+		assert.Truef(t, isIssueKey(s), "%q should parse as an issue key", s)
+	}
+	for _, s := range []string{"", "PP", "123", "PP-", "-1", "PP-x", "PP 1"} {
+		assert.Falsef(t, isIssueKey(s), "%q must not parse as an issue key", s)
+	}
+}
+
+func TestOpen_PrintDoesNotLaunchABrowser(t *testing.T) {
+	withMock(t)
+	srvURL := os.Getenv("ATLASSIAN_BASE_URL")
+	require.NoError(t, os.Unsetenv("ATLASSIAN_BASE_URL"))
+	_, _, err := run(t, "init", "--name", "s", "--base-url", srvURL, "--skip-login")
+	require.NoError(t, err)
+
+	out, _, err := run(t, "open", "--print", "PP-1")
+	require.NoError(t, err)
+	assert.Contains(t, out, "/browse/PP-1")
+
+	// --dry-run behaves like --print rather than opening a window.
+	out, _, err = run(t, "open", "PP-1", "--dry-run")
+	require.NoError(t, err)
+	assert.Contains(t, out, "/browse/PP-1")
 }

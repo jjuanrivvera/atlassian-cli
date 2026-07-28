@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -199,14 +200,84 @@ func TestResolveCloudID_SingleSiteIsUnambiguous(t *testing.T) {
 	assert.Equal(t, "only", got)
 }
 
-func TestDefaultOAuthScopesIncludeOfflineAccess(t *testing.T) {
-	// Without offline_access Atlassian issues no refresh token, the grant expires in an hour,
-	// and every command after that fails with no way to recover but a full re-login.
-	assert.Contains(t, defaultOAuthScopes, "offline_access")
-	assert.Contains(t, defaultOAuthScopes, "read:jira-work")
-	assert.Contains(t, defaultOAuthScopes, "write:jira-work")
-	assert.Contains(t, defaultOAuthScopes, "read:confluence-content.all")
+func TestDefaultOAuthClientIDIsSetAndPublic(t *testing.T) {
+	// The CLI ships its own registered app so `auth login --method oauth2` needs no
+	// developer-console setup. Under authorization-code + PKCE the client id is a public
+	// identifier — it travels in the browser URL of every login — so this is not a secret
+	// leaking into the binary, and no client secret may accompany it.
+	assert.NotEmpty(t, DefaultOAuthClientID)
+	assert.NotContains(t, defaultOAuthScopes, DefaultOAuthClientID)
+
+	// A login that falls back to the built-in app must not ask for a secret it cannot have.
+	login := newAuthLoginCmd(&globalOptions{})
+	require.NotNil(t, login.Flags().Lookup("client-secret"))
+	assert.Equal(t, "", login.Flags().Lookup("client-secret").DefValue,
+		"the built-in app is a public client; a default secret would be a real leak")
+}
+
+func TestDefaultOAuthScopesMatchTheAppRegistration(t *testing.T) {
+	// Atlassian freezes the granted set at the moment a user consents, so a scope added to the
+	// app afterwards forces every existing user to re-consent. The requested list must
+	// therefore match what the app registers: a registered scope that is never requested is
+	// dead weight on the consent screen, and a requested scope that is not registered fails
+	// the authorize call outright. This list is the classic scope set of all four products.
+	want := []string{
+		// Jira platform
+		"read:jira-work", "write:jira-work", "read:jira-user",
+		"manage:jira-project", "manage:jira-configuration",
+		"manage:jira-webhook", "manage:jira-data-provider",
+		// Jira Service Management
+		"read:servicedesk-request", "write:servicedesk-request",
+		"manage:servicedesk-customer", "read:servicemanagement-insight-objects",
+		// Confluence
+		"read:confluence-content.all", "read:confluence-content.summary",
+		"write:confluence-content", "read:confluence-space.summary",
+		"write:confluence-space", "write:confluence-file",
+		"read:confluence-props", "write:confluence-props",
+		"read:confluence-content.permission", "read:confluence-user",
+		"read:confluence-groups", "write:confluence-groups",
+		"search:confluence", "manage:confluence-configuration",
+		"readonly:content.attachment:confluence",
+		// Without offline_access Atlassian issues no refresh token, the grant expires in an
+		// hour, and every command after that fails with no way back but a full re-login.
+		"offline_access",
+	}
+
+	got := strings.Fields(defaultOAuthScopes)
+	assert.ElementsMatch(t, want, got)
+
+	seen := make(map[string]bool, len(got))
+	for _, s := range got {
+		require.False(t, seen[s], "scope %q requested twice", s)
+		seen[s] = true
+	}
 }
 
 // newLocalListener binds a loopback port for the callback-server tests.
 func newLocalListener() (net.Listener, error) { return net.Listen("tcp", "127.0.0.1:0") }
+
+func TestOAuthRedirectURIIsStable(t *testing.T) {
+	// Atlassian matches redirect_uri against the app's registered callback URL exactly and
+	// supports no wildcard or variable port. An ephemeral port would therefore produce a
+	// different redirect_uri on every run and be rejected every time, so the port must be
+	// fixed and knowable in advance.
+	assert.Equal(t, 8990, DefaultOAuthPort)
+
+	root := NewRootCmd()
+	login, _, err := root.Find([]string{"auth", "login"})
+	require.NoError(t, err)
+
+	portFlag := login.Flags().Lookup("port")
+	require.NotNil(t, portFlag, "--port must exist so a busy default can be moved")
+	assert.Equal(t, "8990", portFlag.DefValue)
+
+	// Anyone registering their own app has to reproduce this URL exactly, so the help has to
+	// state it. (It no longer needs to name the developer console: the built-in app means the
+	// default path never visits it, and --client-id is documented for the case that does.)
+	assert.Contains(t, login.Long, "http://127.0.0.1:8990/callback")
+	assert.Contains(t, login.Long, "--client-id")
+
+	// Revocation is the counterweight to shipping a shared app: a user who consents through
+	// it must be told, at the point of consent, how to take that consent back.
+	assert.Contains(t, login.Long, "id.atlassian.com/manage-profile/apps")
+}

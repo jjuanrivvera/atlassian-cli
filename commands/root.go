@@ -217,6 +217,17 @@ func (o *globalOptions) render(cmd *cobra.Command, v any, preferred []string) er
 	return o.renderer(cmd, preferred).Render(v)
 }
 
+// noteWrite reports that a mutating command succeeded.
+//
+// It stays silent during a dry run: nothing was sent, so claiming "assigned PP-1071" would be
+// a plain falsehood, and the printed curl is already the output the flag promised.
+func (o *globalOptions) noteWrite(w io.Writer, format string, args ...any) {
+	if o.dryRun {
+		return
+	}
+	o.note(w, format, args...)
+}
+
 // note writes an advisory to stderr, keeping stdout clean for pipes.
 func (o *globalOptions) note(w io.Writer, format string, args ...any) {
 	if o.quiet {

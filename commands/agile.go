@@ -24,8 +24,10 @@ func init() {
   atlassian boards list --project PP
   atlassian boards issues 42 --max 20
   atlassian boards backlog 42`),
-		New:     func(c *api.Client) *api.Resource[api.Board] { return c.Boards() },
-		Columns: []string{"id", "name", "type", "location.projectKey", "location.projectName"},
+		New: func(c *api.Client) *api.Resource[api.Board] { return c.Boards() },
+		// `location` is a reference object and collapses to its display name when flattened,
+		// so the sub-paths under it never exist as columns.
+		Columns: []string{"id", "name", "type", "location"},
 		ListFilters: []listFilter{
 			{Flag: "project", Query: "projectKeyOrId", Usage: "boards for this project key or id"},
 			{Flag: "name", Query: "name", Usage: "match the board name"},
@@ -275,7 +277,7 @@ func newSprintStateCmd(o *globalOptions, use, state, short string) *cobra.Comman
 				return err
 			}
 			if updated == nil {
-				o.note(cmd.ErrOrStderr(), "sprint %s is now %s", args[0], state)
+				o.noteWrite(cmd.ErrOrStderr(), "sprint %s is now %s", args[0], state)
 				return nil
 			}
 			return o.render(cmd, updated, sprintColumns)
@@ -330,7 +332,7 @@ silently truncated. Use the sprint id 'backlog' to move issues out of any sprint
 					return fmt.Errorf("moved %d of %d issues before failing: %w", start, len(issues), err)
 				}
 			}
-			o.note(cmd.ErrOrStderr(), "moved %d issue(s) to %s", len(issues), args[0])
+			o.noteWrite(cmd.ErrOrStderr(), "moved %d issue(s) to %s", len(issues), args[0])
 			return nil
 		},
 	}

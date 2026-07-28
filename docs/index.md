@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.svg" alt="" width="96" height="96">
+
 # atlassian
 
 [![CI](https://github.com/jjuanrivvera/atlassian-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/jjuanrivvera/atlassian-cli/actions/workflows/ci.yml)
@@ -116,7 +118,7 @@ existing body when only the title changes — otherwise the page is silently emp
 **Built for agents.** `atlassian mcp` serves the whole command tree as annotated MCP tools
 over the same client, keyring and `--dry-run`. `atlassian agent guard` reads the live tree and
 emits host safety config — irreversible operations blocked, writes gated, reads free. See
-[the comparison with Atlassian's own MCP server](docs/comparison.md).
+[the comparison with Atlassian's own MCP server](comparison.md).
 
 ## Output
 
@@ -160,7 +162,8 @@ Credentials go to the OS keyring — never to the config file. On a headless box
 | | |
 |---|---|
 | [Command reference](https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian/) | Every command, generated from the binary |
-| [Comparison](docs/comparison.md) | Against Atlassian's Rovo MCP server, `acli` and `jira-cli` |
+| [Comparison](comparison.md) | Against Atlassian's Rovo MCP server, `acli` and `jira-cli` |
+| [OAuth setup](oauth-app.md) | Creating a developer app, if you need `--method oauth2` |
 | [DECISIONS.md](DECISIONS.md) | Why the CLI behaves the way it does |
 | [AGENTS.md](AGENTS.md) | Contributing, and the build gate |
 

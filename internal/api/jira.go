@@ -311,6 +311,15 @@ type SearchResult struct {
 	IsLast        *bool   `json:"isLast,omitempty"`
 }
 
+// DefaultSearchFields is what a JQL search requests when the caller names no fields.
+//
+// This is not a nicety. The /search/jql endpoint returns ONLY the issue id when `fields` is
+// absent — no key, no summary, not even `self`. That is a behavioural change from the
+// deprecated /search endpoint, which defaulted to all navigable fields, and it makes an
+// unqualified search useless: a table of bare numeric ids. Requesting an explicit set
+// restores the old behaviour while keeping the response small.
+const DefaultSearchFields = "summary,status,assignee,priority,issuetype,updated,created,labels,resolution"
+
 // SearchOptions are the JQL search parameters.
 type SearchOptions struct {
 	JQL       string
@@ -332,9 +341,12 @@ type SearchOptions struct {
 func (c *Client) SearchJQL(ctx context.Context, o SearchOptions) (*SearchResult, error) {
 	q := url.Values{}
 	q.Set("jql", o.JQL)
-	if o.Fields != "" {
-		q.Set("fields", o.Fields)
+	// Always send `fields`: without it the endpoint returns bare ids (see DefaultSearchFields).
+	fields := o.Fields
+	if fields == "" {
+		fields = DefaultSearchFields
 	}
+	q.Set("fields", fields)
 	if o.Expand != "" {
 		q.Set("expand", o.Expand)
 	}

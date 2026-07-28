@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -40,7 +41,7 @@ const maxAutoColumns = 10
 
 // maxCellWidth truncates a table cell. Long ADF descriptions would otherwise destroy the
 // column alignment for every other row.
-const maxCellWidth = 48
+const maxCellWidth = 60
 
 // Renderer writes results.
 type Renderer struct {
@@ -154,9 +155,19 @@ func (r *Renderer) renderIDs(v any) error {
 	}
 	for _, row := range rows {
 		val := row[field]
+		// Fall back to the OTHER identifier, never the same one again: a resource whose
+		// IDField is "key" would otherwise retry "key", find nothing, and silently print an
+		// empty list — which reads identically to "no results".
 		if val == nil {
-			// Fall back to key, which is the natural identifier for Jira issues and projects.
-			val = row["key"]
+			for _, alt := range []string{"key", "id"} {
+				if alt == field {
+					continue
+				}
+				if v := row[alt]; v != nil {
+					val = v
+					break
+				}
+			}
 		}
 		if val == nil {
 			continue
@@ -194,6 +205,13 @@ func (r *Renderer) renderCSV(v any) error {
 }
 
 func (r *Renderer) renderTable(v any) error {
+	// A scalar result (`--jq length`, `--jq .key`) is a value, not a table. Wrapping it in a
+	// one-cell table headed VALUE makes it unusable in a shell substitution.
+	if s, ok := scalarValue(v); ok {
+		fmt.Fprintln(r.Out, s)
+		return nil
+	}
+
 	rows, single, err := rowsOf(v)
 	if err != nil {
 		return err
@@ -212,7 +230,7 @@ func (r *Renderer) renderTable(v any) error {
 	cells := make([][]string, 0, len(rows)+1)
 	header := make([]string, len(cols))
 	for i, c := range cols {
-		header[i] = strings.ToUpper(c)
+		header[i] = headerLabel(c)
 	}
 	cells = append(cells, header)
 
@@ -220,7 +238,9 @@ func (r *Renderer) renderTable(v any) error {
 	for _, row := range rows {
 		rec := make([]string, len(cols))
 		for i, c := range cols {
-			s := sanitizeTerminal(scalar(row[c]))
+			// Timestamps are shortened for the eye only. CSV and JSON keep the exact value,
+			// because those are what a script parses.
+			s := humanTime(sanitizeTerminal(scalar(row[c])))
 			if t, cut := truncateRunes(s, maxCellWidth); cut {
 				truncated = true
 				s = t
@@ -256,6 +276,72 @@ func (r *Renderer) renderTable(v any) error {
 	return nil
 }
 
+// scalarValue reports whether v is a bare scalar and renders it.
+func scalarValue(v any) (string, bool) {
+	switch t := v.(type) {
+	case nil:
+		return "", false
+	case string:
+		return t, true
+	case bool:
+		return strconv.FormatBool(t), true
+	case json.Number:
+		return t.String(), true
+	case float64:
+		return strconv.FormatFloat(t, 'f', -1, 64), true
+	case int, int64:
+		return fmt.Sprint(t), true
+	}
+	return "", false
+}
+
+// humanTime shortens a full timestamp for table display.
+//
+// Atlassian returns "2026-07-24T16:35:15.911-0400". The milliseconds and offset are never
+// what someone scanning a table needs, and they cost 16 characters that then push a real
+// column into truncation.
+func humanTime(v string) string {
+	if len(v) < 19 || v[4] != '-' || v[7] != '-' || v[10] != 'T' {
+		return v
+	}
+	for _, layout := range []string{
+		"2006-01-02T15:04:05.000-0700",
+		"2006-01-02T15:04:05-0700",
+		time.RFC3339Nano,
+		time.RFC3339,
+	} {
+		if t, err := time.Parse(layout, v); err == nil {
+			return t.Local().Format("2006-01-02 15:04")
+		}
+	}
+	return v
+}
+
+// headerLabel turns a lookup path into a column heading.
+//
+// The path is how the value is addressed (`fields.summary`), which is not how a person reads
+// a table. The container prefix carries no information — every column in an issue table is
+// under `fields` — so it is dropped, and the remainder is spaced out.
+func headerLabel(col string) string {
+	label := col
+	for _, prefix := range []string{"fields.", "location.", "content.", "version.", "currentStatus."} {
+		if strings.HasPrefix(label, prefix) {
+			label = strings.TrimPrefix(label, prefix)
+			break
+		}
+	}
+	label = strings.ReplaceAll(label, ".", " ")
+	// camelCase -> spaced words, so `projectTypeKey` reads as PROJECT TYPE KEY.
+	var b strings.Builder
+	for i, r := range label {
+		if i > 0 && unicode.IsUpper(r) && !unicode.IsUpper(rune(label[i-1])) {
+			b.WriteByte(' ')
+		}
+		b.WriteRune(r)
+	}
+	return strings.ToUpper(b.String())
+}
+
 func (r *Renderer) renderKeyValue(row map[string]any) error {
 	keys := r.orderKeys(collectKeys([]map[string]any{row}), false)
 	width := 0
@@ -274,11 +360,35 @@ func (r *Renderer) renderKeyValue(row map[string]any) error {
 	return nil
 }
 
-// chooseColumns resolves explicit --columns, else picks automatically.
+// chooseColumns resolves --columns, else the resource's curated set, else picks automatically.
 func (r *Renderer) chooseColumns(rows []map[string]any, single bool) []string {
 	if len(r.Columns) > 0 {
 		return r.Columns
 	}
+
+	present := map[string]bool{}
+	for _, k := range collectKeys(rows) {
+		present[k] = true
+	}
+
+	// A resource that declares Preferred columns has curated a view; show exactly that, not
+	// that plus every other key in the payload. Treating Preferred as a mere sort order is
+	// what produced ten-column walls padded with `self` URLs and internal ids, and a
+	// truncation note on almost every command.
+	if len(r.Preferred) > 0 {
+		curated := make([]string, 0, len(r.Preferred))
+		for _, p := range r.Preferred {
+			if present[p] {
+				curated = append(curated, p)
+			}
+		}
+		if len(curated) > 0 {
+			return curated
+		}
+		// The declared columns are absent from this payload (a partial `--fields`, say), so
+		// fall through to automatic selection rather than printing an empty table.
+	}
+
 	keys := r.orderKeys(collectKeys(rows), true)
 	if !single && len(keys) > maxAutoColumns {
 		r.note(fmt.Sprintf("showing %d of %d columns — use --columns or -o json for the rest",
@@ -492,7 +602,9 @@ func sanitizeCSV(s string) string {
 // could rewrite the terminal, hide output, or in some emulators inject input.
 func sanitizeTerminal(s string) string {
 	if !strings.ContainsFunc(s, isControl) {
-		return s
+		// Real summaries carry stray leading/trailing spaces, which misalign the column for
+		// every other row.
+		return strings.TrimSpace(s)
 	}
 	var b strings.Builder
 	b.Grow(len(s))

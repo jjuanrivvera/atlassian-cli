@@ -110,6 +110,26 @@ func NewClient(hosts HostResolver, opts ...Option) *Client {
 // DryRun reports whether the client is in dry-run mode.
 func (c *Client) DryRun() bool { return c.dryRun }
 
+// ReadThrough returns a client with dry-run disabled, for the read-only lookups a command
+// must perform in order to BUILD the request it is about to describe.
+//
+// Suppressing those lookups makes --dry-run actively misleading rather than merely limited:
+// `issues assign --to me` resolves an accountId first, and with the lookup suppressed it
+// printed a request containing an empty accountId — a command that would have been wrong if
+// run. `issues transition --to Done` resolves a transition id and failed outright.
+//
+// Only reads go through here. The mutating request itself is still suppressed and printed,
+// which is the whole point of the flag.
+func (c *Client) ReadThrough() *Client {
+	if !c.dryRun {
+		return c
+	}
+	clone := *c
+	clone.dryRun = false
+	clone.dryRunTo = nil
+	return &clone
+}
+
 // Rate reports the limiter's current effective requests/second.
 func (c *Client) Rate() float64 {
 	if c.limiter == nil {

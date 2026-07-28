@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jjuanrivvera/atlassian-cli/internal/api"
 	"github.com/jjuanrivvera/atlassian-cli/internal/auth"
 	"github.com/jjuanrivvera/atlassian-cli/internal/catalog"
 	"github.com/jjuanrivvera/atlassian-cli/internal/config"
@@ -152,7 +154,15 @@ func runDoctor(cmd *cobra.Command, o *globalOptions) []check {
 	// about Confluence. Probing it turns a later confusing 403 into a warning here.
 	if site.Deployment == config.DeploymentCloud {
 		if err := probeConfluence(cmd, o, site); err != nil {
-			add("confluence", statusWarn, "not reachable with these credentials: "+err.Error())
+			// Jira has already authenticated with this same credential by the time we get
+			// here, so "your credentials are wrong" is the one explanation that is ruled out.
+			// The generic 401 hint would send someone to re-run `auth login` for no reason.
+			detail := "not reachable — this site may not have Confluence, or your account may " +
+				"not be licensed for it. Jira works, so the credential itself is fine."
+			if !errors.Is(err, api.ErrUnauthorized) && !errors.Is(err, api.ErrForbidden) {
+				detail = "not reachable: " + err.Error()
+			}
+			add("confluence", statusWarn, detail)
 		} else {
 			add("confluence", statusOK, "reachable")
 		}

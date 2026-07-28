@@ -355,7 +355,9 @@ vs "Done" the status).`),
 
 			transitionID := id
 			if transitionID == "" {
-				transitions, err := client.Transitions(cmd.Context(), args[0])
+				// ReadThrough: resolving the name to an id is a read, and without it a dry run
+				// could not describe the request it is previewing.
+				transitions, err := client.ReadThrough().Transitions(cmd.Context(), args[0])
 				if err != nil {
 					return err
 				}
@@ -385,7 +387,7 @@ vs "Done" the status).`),
 					return fmt.Errorf("transitioned, but the comment failed: %w", err)
 				}
 			}
-			o.note(cmd.ErrOrStderr(), "transitioned %s", args[0])
+			o.noteWrite(cmd.ErrOrStderr(), "transitioned %s", args[0])
 			return nil
 		},
 	}
@@ -476,7 +478,7 @@ Names and emails are resolved through user search before the assignment is sent.
 			if err != nil {
 				return err
 			}
-			o.note(cmd.ErrOrStderr(), "assigned %s", args[0])
+			o.noteWrite(cmd.ErrOrStderr(), "assigned %s", args[0])
 			return nil
 		},
 	}
@@ -533,7 +535,7 @@ func postComment(cmd *cobra.Command, o *globalOptions, client *api.Client, issue
 		return err
 	}
 	if created.ID != "" {
-		o.note(cmd.ErrOrStderr(), "added comment %s to %s", created.ID, issue)
+		o.noteWrite(cmd.ErrOrStderr(), "added comment %s to %s", created.ID, issue)
 	}
 	return nil
 }
@@ -634,7 +636,7 @@ Log time against an issue.
 			if err != nil {
 				return err
 			}
-			o.note(cmd.ErrOrStderr(), "logged %s against %s", timeSpent, args[0])
+			o.noteWrite(cmd.ErrOrStderr(), "logged %s against %s", timeSpent, args[0])
 			return nil
 		},
 	}
@@ -726,6 +728,10 @@ func resolveAccountID(cmd *cobra.Command, o *globalOptions, who string) (string,
 	if err != nil {
 		return "", err
 	}
+	// ReadThrough so a dry run resolves the real accountId instead of printing a request with
+	// an empty one.
+	client = client.ReadThrough()
+
 	if strings.EqualFold(who, "me") || strings.EqualFold(who, "currentuser") {
 		me, err := client.Myself(cmd.Context())
 		if err != nil {

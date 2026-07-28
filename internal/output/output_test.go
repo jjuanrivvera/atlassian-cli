@@ -3,6 +3,7 @@ package output
 import (
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -42,7 +43,9 @@ func TestRender_AllFourFormats(t *testing.T) {
 	})
 
 	t.Run("csv", func(t *testing.T) {
-		got, _ := render(t, FormatCSV, rows, func(r *Renderer) { r.Preferred = []string{"id", "name"} })
+		got, _ := render(t, FormatCSV, rows, func(r *Renderer) {
+			r.Preferred = []string{"id", "name", "active"}
+		})
 		records, err := csv.NewReader(strings.NewReader(got)).ReadAll()
 		require.NoError(t, err)
 		assert.Equal(t, []string{"id", "name", "active"}, records[0])
@@ -71,22 +74,38 @@ func TestRender_IDFallsBackToKey(t *testing.T) {
 
 func TestRender_ColumnOrderIsDeterministic(t *testing.T) {
 	// Go randomizes map iteration, so without an explicit order the same command would print
-	// its columns differently on every run.
+	// its columns in a different order on every run.
 	row := map[string]any{"zebra": 1, "alpha": 2, "id": 3, "name": 4}
 
-	var first string
-	for i := range 20 {
-		got, _ := render(t, FormatCSV, []map[string]any{row}, func(r *Renderer) {
-			r.Preferred = []string{"id", "name"}
-		})
-		header := strings.SplitN(got, "\n", 2)[0]
-		if i == 0 {
-			first = header
-			assert.Equal(t, "id,name,alpha,zebra", header,
-				"preferred fields first, then the rest alphabetically")
+	t.Run("preferred columns limit and order the view", func(t *testing.T) {
+		var first string
+		for i := range 20 {
+			got, _ := render(t, FormatCSV, []map[string]any{row}, func(r *Renderer) {
+				r.Preferred = []string{"id", "name"}
+			})
+			header := strings.SplitN(got, "\n", 2)[0]
+			if i == 0 {
+				first = header
+				// Exactly the declared columns: a curated view is not "these first, then
+				// everything else too".
+				assert.Equal(t, "id,name", header)
+			}
+			assert.Equal(t, first, header, "column order must be stable across runs")
 		}
-		assert.Equal(t, first, header, "column order must be stable across runs")
-	}
+	})
+
+	t.Run("automatic selection sorts alphabetically", func(t *testing.T) {
+		var first string
+		for i := range 20 {
+			got, _ := render(t, FormatCSV, []map[string]any{row}, nil)
+			header := strings.SplitN(got, "\n", 2)[0]
+			if i == 0 {
+				first = header
+				assert.Equal(t, "alpha,id,name,zebra", header)
+			}
+			assert.Equal(t, first, header, "column order must be stable across runs")
+		}
+	})
 }
 
 func TestRender_ExplicitColumns(t *testing.T) {
@@ -250,4 +269,81 @@ func TestRender_UnknownFormatErrors(t *testing.T) {
 	var out, errBuf bytes.Buffer
 	r := New(&out, &errBuf, "toml")
 	require.Error(t, r.Render([]map[string]any{{"a": 1}}))
+}
+
+func TestPreferredColumnsLimitTheView(t *testing.T) {
+	// A resource that declares its columns has curated a view. Treating Preferred as a mere
+	// sort order produced ten-column walls padded with `self` URLs and internal ids, plus a
+	// truncation note on nearly every command.
+	rows := []map[string]any{{
+		"key": "PP-1", "fields.summary": "s", "fields.status": "Open",
+		"self": "https://x/rest/api/3/issue/1", "id": "10001", "expand": "renderedFields",
+	}}
+	got, _ := render(t, FormatTable, rows, func(r *Renderer) {
+		r.Preferred = []string{"key", "fields.summary", "fields.status"}
+	})
+	assert.Contains(t, got, "KEY")
+	assert.Contains(t, got, "SUMMARY")
+	assert.NotContains(t, got, "SELF", "a curated view must not be padded with internals")
+	assert.NotContains(t, got, "EXPAND")
+}
+
+func TestPreferredFallsBackWhenAbsent(t *testing.T) {
+	// A partial --fields can leave none of the declared columns present; printing an empty
+	// table would be worse than falling back to what the payload actually has.
+	rows := []map[string]any{{"id": "1", "other": "x"}}
+	got, _ := render(t, FormatTable, rows, func(r *Renderer) {
+		r.Preferred = []string{"key", "fields.summary"}
+	})
+	assert.Contains(t, got, "ID")
+}
+
+func TestHeaderLabel(t *testing.T) {
+	cases := map[string]string{
+		"key":                 "KEY",
+		"fields.summary":      "SUMMARY",
+		"fields.status":       "STATUS",
+		"location.projectKey": "PROJECT KEY",
+		"projectTypeKey":      "PROJECT TYPE KEY",
+		"version.number":      "NUMBER",
+	}
+	for in, want := range cases {
+		assert.Equalf(t, want, headerLabel(in), "headerLabel(%q)", in)
+	}
+}
+
+func TestHumanTime(t *testing.T) {
+	// Milliseconds and a numeric offset are never what someone scanning a table needs, and
+	// they cost 16 characters that push a real column into truncation.
+	got := humanTime("2026-07-24T16:35:15.911-0400")
+	assert.Regexp(t, `^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$`, got)
+
+	// Anything that is not a timestamp passes through untouched.
+	for _, s := range []string{"", "PP-1071", "In Progress", "2026", "not-a-date-at-all"} {
+		assert.Equal(t, s, humanTime(s))
+	}
+}
+
+func TestScalarJQResultPrintsBare(t *testing.T) {
+	// `--jq length` in a shell substitution must yield 112, not a table headed VALUE.
+	got, _ := render(t, FormatTable, json.Number("112"), nil)
+	assert.Equal(t, "112\n", got)
+
+	got, _ = render(t, FormatTable, "PP-1071", nil)
+	assert.Equal(t, "PP-1071\n", got)
+}
+
+func TestTableTrimsCellWhitespace(t *testing.T) {
+	// Real Jira summaries carry stray leading spaces that misalign every other row.
+	got, _ := render(t, FormatTable, []map[string]any{
+		{"key": "PP-1", "summary": "  leading space"},
+		{"key": "PP-2", "summary": "normal"},
+	}, func(r *Renderer) { r.Preferred = []string{"key", "summary"} })
+	// Two spaces are the column separator; a surviving stray space would make three.
+	assert.NotContains(t, got, "   leading space")
+	assert.Contains(t, got, "  leading space")
+	// Both rows must start their summary at the same column.
+	lines := strings.Split(strings.TrimSpace(got), "\n")
+	require.Len(t, lines, 3)
+	assert.Equal(t, strings.Index(lines[1], "leading"), strings.Index(lines[2], "normal"))
 }

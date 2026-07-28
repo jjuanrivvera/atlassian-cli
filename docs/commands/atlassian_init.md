@@ -19,17 +19,20 @@ atlassian init [flags]
 atlassian init
   atlassian init --name acme --base-url https://acme.atlassian.net --email me@acme.com
   atlassian init --name onprem --base-url https://jira.internal --deployment datacenter
+  atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2 --client-id <id>
 ```
 
 ### Options
 
 ```
       --base-url string     site URL, e.g. https://acme.atlassian.net
+      --client-id string    OAuth client id (--method oauth2; defaults to this CLI's own registered app)
       --deployment string   cloud|datacenter (inferred from the URL when omitted)
       --email string        account email (Cloud basic auth)
   -h, --help                help for init
       --method string       auth method: basic|pat|oauth2 (inferred from the deployment)
       --name string         name for this site (defaults to the host)
+      --scopes string       OAuth scopes to request (--method oauth2; defaults to the full set)
       --skip-login          register the site without capturing credentials
       --token string        API token or personal access token (prompted if omitted)
 ```

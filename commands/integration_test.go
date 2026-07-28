@@ -713,3 +713,90 @@ func TestIntegration_DeleteRefusesWithoutATerminal(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "--yes")
 }
+
+// These three cover defects found only by running against a real Jira. The mock could not
+// have caught them: it returned whatever shape the test author assumed.
+
+func TestIntegration_SearchAlwaysRequestsFields(t *testing.T) {
+	isolateHome(t)
+
+	var gotFields string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotFields = r.URL.Query().Get("fields")
+		_, _ = w.Write([]byte(`{"issues":[{"id":"1","key":"PP-1","fields":{"summary":"s"}}]}`))
+	}))
+	defer srv.Close()
+	t.Setenv("ATLASSIAN_BASE_URL", srv.URL)
+	t.Setenv("ATLASSIAN_EMAIL", "me@example.com")
+	t.Setenv("ATLASSIAN_API_TOKEN", "t")
+
+	// /search/jql returns ONLY the issue id when `fields` is absent — no key, no summary. An
+	// unqualified search would render a table of bare numbers.
+	_, _, err := run(t, "issues", "list", "--jql", "project = PP")
+	require.NoError(t, err)
+	require.NotEmpty(t, gotFields, "a JQL search must always send `fields`")
+	assert.Contains(t, gotFields, "summary")
+	assert.Contains(t, gotFields, "status")
+
+	// An explicit --fields still wins.
+	_, _, err = run(t, "issues", "list", "--jql", "project = PP", "--fields", "summary")
+	require.NoError(t, err)
+	assert.Equal(t, "summary", gotFields)
+}
+
+func TestIntegration_DryRunPerformsLookupsButNotWrites(t *testing.T) {
+	isolateHome(t)
+
+	var writes int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writes++
+		}
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/myself"):
+			_, _ = w.Write([]byte(`{"accountId":"5b10a","displayName":"Juan"}`))
+		case strings.HasSuffix(r.URL.Path, "/transitions"):
+			_, _ = w.Write([]byte(`{"transitions":[{"id":"31","name":"Done","to":{"name":"Done"}}]}`))
+		default:
+			_, _ = w.Write([]byte(`{}`))
+		}
+	}))
+	defer srv.Close()
+	t.Setenv("ATLASSIAN_BASE_URL", srv.URL)
+	t.Setenv("ATLASSIAN_EMAIL", "me@example.com")
+	t.Setenv("ATLASSIAN_API_TOKEN", "t")
+
+	// The accountId lookup must still run, or the previewed request carries an empty id — a
+	// dry run that shows a request which would be WRONG if executed.
+	out, errOut, err := run(t, "issues", "assign", "PP-1", "--to", "me", "--dry-run")
+	require.NoError(t, err)
+	assert.Contains(t, out, `"accountId":"5b10a"`)
+	assert.NotContains(t, out, `"accountId":""`)
+	assert.Zero(t, writes, "a dry run must send no mutating request")
+	// And it must not claim the change happened.
+	assert.NotContains(t, errOut, "assigned")
+
+	// Same for a transition, which needs the name resolved to an id first.
+	out, _, err = run(t, "issues", "transition", "PP-1", "--to", "Done", "--dry-run")
+	require.NoError(t, err)
+	assert.Contains(t, out, `"id":"31"`)
+	assert.Zero(t, writes)
+}
+
+func TestIntegration_IDOutputFallsBackToTheOtherIdentifier(t *testing.T) {
+	isolateHome(t)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		// An issue with no `key` — what /search/jql returns when fields are missing.
+		_, _ = w.Write([]byte(`{"issues":[{"id":"34209"}]}`))
+	}))
+	defer srv.Close()
+	t.Setenv("ATLASSIAN_BASE_URL", srv.URL)
+	t.Setenv("ATLASSIAN_EMAIL", "me@example.com")
+	t.Setenv("ATLASSIAN_API_TOKEN", "t")
+
+	// issues use IDField "key"; falling back to "key" again printed nothing at all, which
+	// reads exactly like "no results".
+	out, _, err := run(t, "issues", "list", "--jql", "project = PP", "-o", "id")
+	require.NoError(t, err)
+	assert.Equal(t, "34209\n", out)
+}

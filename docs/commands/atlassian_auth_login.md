@@ -9,6 +9,16 @@ saving — so a typo fails here rather than on the next command.
 
 The token is read without echoing when the terminal is interactive; pass --token to script it.
 
+--method oauth2 needs no setup: it uses this CLI's own registered app, opens your browser for
+consent, and catches the redirect on http://127.0.0.1:8990/callback. Consent is per user and
+per site, and you can revoke it at any time at https://id.atlassian.com/manage-profile/apps.
+
+Pass --client-id to consent through your own app instead — for your own audit trail, or to be
+free of this app's rate limits. Register it with that same callback URL: Atlassian matches it
+exactly and supports no wildcard port, which is why the port is fixed rather than chosen per
+run. Use --port if something else holds it (and register the matching URL), or --mode oob to
+paste the code by hand on a machine with no browser.
+
 ```
 atlassian auth login [flags]
 ```
@@ -16,22 +26,24 @@ atlassian auth login [flags]
 ### Examples
 
 ```
-atlassian auth login                                   # Cloud: email + API token
-  atlassian auth login --method pat                      # Data Center: personal access token
-  atlassian auth login --method oauth2 --client-id <id>  # Cloud: OAuth 2.0 (3LO)
+atlassian auth login                        # Cloud: email + API token
+  atlassian auth login --method pat           # Data Center: personal access token
+  atlassian auth login --method oauth2        # Cloud: OAuth 2.0 (3LO), no app setup
+  atlassian auth login --method oauth2 --client-id <id>   # ...through your own app
   atlassian auth login --email me@example.com --token "$ATLASSIAN_API_TOKEN"
 ```
 
 ### Options
 
 ```
-      --client-id string       OAuth client id
+      --client-id string       OAuth client id (defaults to this CLI's own registered app)
       --client-secret string   OAuth client secret
       --email string           account email (basic auth)
   -h, --help                   help for login
       --method string          auth method: basic|pat|oauth2
       --mode string            OAuth redirect handling: auto|local|oob (default "auto")
-      --scopes string          OAuth scopes to request (default "read:jira-work write:jira-work read:jira-user read:confluence-content.all write:confluence-content offline_access")
+      --port int               loopback port for the OAuth redirect — must match the callback URL registered on the app (default 8990)
+      --scopes string          OAuth scopes to request (default "read:jira-work write:jira-work read:jira-user manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider read:servicedesk-request write:servicedesk-request manage:servicedesk-customer read:servicemanagement-insight-objects read:confluence-content.all read:confluence-content.summary write:confluence-content read:confluence-space.summary write:confluence-space write:confluence-file read:confluence-props write:confluence-props read:confluence-content.permission read:confluence-user read:confluence-groups write:confluence-groups search:confluence manage:confluence-configuration readonly:content.attachment:confluence offline_access")
       --token string           API token or personal access token (prompted if omitted)
 ```
 
