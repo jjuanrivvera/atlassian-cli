@@ -25,7 +25,25 @@ you use for Jira.
   CLI` is fine; so is `<Your Company> CLI`.
 - Accept the developer terms → **Create**
 
-## 2. Add permissions (scopes)
+## 2. Choose the access type
+
+The console asks this while you create the integration. Pick **Resource-level**.
+
+| Option | The token can reach |
+|---|---|
+| **Resource-level** ← pick this | Only the one site chosen at consent, e.g. `acme.atlassian.net` |
+| Account-level | Every site on the account — `acme`, `acme-dev`, `acme-support` — whichever one was chosen |
+
+Resource-level matches how this CLI works: each site is its own profile with its own credential
+in the keyring, so you authorize once per site regardless. Account-level would not save you a
+step — it would only widen what each token can reach, which matters more than usual here
+because the same credential backs the MCP tools an agent can call.
+
+Pick account-level only if you genuinely operate several sites as one estate and want a single
+consent to cover them — for instance holding tokens for two sites at once in order to copy work
+between them. You can change this later without recreating the app.
+
+## 3. Add permissions (scopes)
 
 **Permissions** in the left menu. For each product you want, click **Add**, then
 **Configure**, then tick the scopes.
@@ -52,7 +70,7 @@ Confluence API, if the site has Confluence:
     rather than discovering it endpoint by endpoint. If unsure, include the read scopes for
     both products.
 
-## 3. Set the callback URL
+## 4. Set the callback URL
 
 **Authorization** in the left menu → **OAuth 2.0 (3LO)** → **Configure**.
 
@@ -70,14 +88,14 @@ http://127.0.0.1:8990/callback
 
 Save.
 
-## 4. Copy the client id
+## 5. Copy the client id
 
 **Settings** in the left menu → copy the **Client ID**.
 
 The **Secret** on the same page is optional for this CLI: it uses PKCE, which is what makes a
 public client safe without one. Leave the secret prompt blank unless you have a reason.
 
-## 5. Log in
+## 6. Log in
 
 ```sh
 atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2
@@ -96,7 +114,7 @@ atlassian auth login --method oauth2 --client-id <id> --mode oob
 That prints the URL for you to open elsewhere, then asks you to paste back the `code`
 parameter from the redirect.
 
-## 6. Sharing it with other people (optional)
+## 7. Sharing it with other people (optional)
 
 **Distribution** in the left menu → toggle sharing on. Users will see a warning that the app
 has not been reviewed by Atlassian until you take it through Marketplace review.
@@ -127,6 +145,7 @@ developer account.
 |---|---|
 | `invalid redirect_uri` | The registered callback does not match exactly. Compare it against the URL the CLI prints before opening the browser. |
 | `cannot listen on 127.0.0.1:8990` | Something else holds the port. Use `--port` and register the matching URL, or `--mode oob`. |
+| `no accessible site matches <url>` | Account-level access returned several sites and none matched your base URL exactly. The error lists what the token can reach; copy the right one into `atlassian config set base_url`. Resource-level has no such failure mode. |
 | Consent screen lists no products | No scopes added. Go back to **Permissions**. |
 | `403` after a successful login | The token authenticated but lacks a scope for that call. Add it, then re-consent. |
 | Works for an hour, then fails | `offline_access` was not granted. Re-run `auth login`. |
