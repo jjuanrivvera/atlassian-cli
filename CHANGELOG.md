@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-07-28
+
+### Fixed
+
+- **A credential written to the file store on a box that also has an OS keyring was read back
+  from the empty keyring.** The store choice depended on `ATLASSIAN_KEYRING_BACKEND` in the
+  environment — a shell variable a non-interactive `ssh host 'atlassian …'` never sets — so
+  the write path (file, forced interactively) and the read path (keyring, the default) could
+  disagree. The **presence of a `keyring-password` file now selects the file store** on its
+  own, persistently and independent of any shell, so read and write always agree. Follows
+  0.2.2, which taught the password to come from a file; this makes the file also decide the
+  backend.
+
 ## [0.2.2] - 2026-07-28
 
 ### Fixed
@@ -140,7 +153,8 @@ First release.
   formula-injection neutralization and terminal-escape sanitization.
 - `--dry-run` printing the equivalent curl with the credential redacted.
 
-[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.1...v0.2.0

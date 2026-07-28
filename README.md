@@ -144,21 +144,25 @@ atlassian issues list --site onprem --jql 'project = OPS'
 atlassian config use work
 ```
 
-Credentials go to the OS keyring — never to the config file. On a headless box with no
-keyring, the CLI uses an AES-256-GCM encrypted-file store, unlocked by a password it finds in
-this order: `ATLASSIAN_KEYRING_PASSWORD`, the file named by `ATLASSIAN_KEYRING_PASSWORD_FILE`,
-or a `keyring-password` file (mode `600`) in the config dir. Prefer a file over the env var:
-it needs no shell setup, so it works under a non-interactive `ssh host 'atlassian …'` or cron
-where `.bashrc`/`.zshrc` are never sourced — and the secret stays out of every child process's
-environment. Force the file store anywhere with `ATLASSIAN_KEYRING_BACKEND=file`.
+Credentials go to the OS keyring — never to the config file. On a box without a usable keyring
+(a headless server, a machine reached over SSH), drop a `keyring-password` file in the config
+dir and the CLI uses an AES-256-GCM encrypted-file store instead:
 
 ```sh
-# One-time headless setup — no shell rc editing, works in every context:
+# One-time headless setup — works in every execution context:
 umask 077
 mkdir -p ~/.atlassian-cli
 openssl rand -base64 33 | tr -d '\n' > ~/.atlassian-cli/keyring-password
 atlassian init --name work --base-url https://acme.atlassian.net --email me@acme.com
 ```
+
+The password file is the durable choice, not the env var. Its **presence selects the file
+store**, so a credential written on that box is read back from the same place — even where a
+keyring also exists. And because the CLI reads the file itself, it needs no shell setup: it
+works under a non-interactive `ssh host 'atlassian …'` or cron, where `.bashrc`/`.zshrc` are
+never sourced and an exported `ATLASSIAN_KEYRING_PASSWORD` would be absent. The file must be
+mode `600` — a looser one is refused, not silently used. `ATLASSIAN_KEYRING_PASSWORD_FILE`
+points at an alternate path; `ATLASSIAN_KEYRING_BACKEND=file` still forces the store explicitly.
 
 ## Safety
 

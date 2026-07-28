@@ -286,7 +286,7 @@ func TestKeyringPassword_FromExplicitFile(t *testing.T) {
 	require.NoError(t, os.WriteFile(pwFile, []byte("file-secret\n"), 0o600))
 	t.Setenv(KeyringPasswordFileEnv, pwFile)
 
-	pw, err := keyringPassword()
+	pw, _, err := keyringPassword()
 	require.NoError(t, err)
 	assert.Equal(t, "file-secret", pw, "a trailing newline must be trimmed")
 
@@ -308,7 +308,7 @@ func TestKeyringPassword_FromDefaultFileInConfigDir(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(cfg, "atlassian-cli", "keyring-password"),
 		[]byte("default-secret"), 0o600))
 
-	pw, err := keyringPassword()
+	pw, _, err := keyringPassword()
 	require.NoError(t, err)
 	assert.Equal(t, "default-secret", pw)
 }
@@ -319,7 +319,7 @@ func TestKeyringPassword_EnvBeatsFile(t *testing.T) {
 	t.Setenv(KeyringPasswordFileEnv, pwFile)
 	t.Setenv(KeyringPasswordEnv, "env-secret")
 
-	pw, err := keyringPassword()
+	pw, _, err := keyringPassword()
 	require.NoError(t, err)
 	assert.Equal(t, "env-secret", pw, "an explicit env var must win over the file")
 }
@@ -335,7 +335,7 @@ func TestKeyringPassword_RefusesLoosePermissions(t *testing.T) {
 
 	// A password the whole machine can read is not protecting anything. Refuse it loudly
 	// rather than use it, and never silently degrade to "no password".
-	_, err := keyringPassword()
+	_, _, err := keyringPassword()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "chmod 600")
 }
@@ -345,7 +345,7 @@ func TestKeyringPassword_MissingExplicitFileErrors(t *testing.T) {
 	t.Setenv(KeyringPasswordFileEnv, filepath.Join(t.TempDir(), "does-not-exist"))
 	// An explicitly named file that isn't there is a misconfiguration worth reporting, unlike
 	// the default file simply being absent.
-	_, err := keyringPassword()
+	_, _, err := keyringPassword()
 	require.Error(t, err)
 }
 
@@ -410,6 +410,24 @@ func TestBuild_EnvTokenWins(t *testing.T) {
 	assert.Equal(t, "from-env", built.Credential.Token)
 	// And it must never be echoed in full by the describe output.
 	assert.NotContains(t, built.Authenticator.Describe(), "from-env")
+}
+
+func TestNewStore_PasswordFileForcesFileStore(t *testing.T) {
+	// The regression this guards: a credential written to the file store on a box that also
+	// has a usable OS keyring must be read back from the file store, not from an empty
+	// keyring. A password *file* selects the file store even when keyringUsable() is true, so
+	// the choice never rides on a shell-exported variable a non-interactive shell won't set.
+	require.NoError(t, os.Unsetenv(KeyringPasswordEnv))
+	require.NoError(t, os.Unsetenv(KeyringPasswordFileEnv))
+	require.NoError(t, os.Unsetenv(KeyringBackendEnv))
+	cfg := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", cfg)
+	require.NoError(t, os.MkdirAll(filepath.Join(cfg, "atlassian-cli"), 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(cfg, "atlassian-cli", "keyring-password"),
+		[]byte("pw"), 0o600))
+
+	assert.Equal(t, "encrypted-file", NewStore().Backend(),
+		"a keyring-password file must select the file store regardless of keyring availability")
 }
 
 func TestRedact(t *testing.T) {
