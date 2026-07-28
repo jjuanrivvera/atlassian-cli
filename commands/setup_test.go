@@ -65,6 +65,19 @@ func TestInit_SkipLogin(t *testing.T) {
 	assert.Contains(t, out, "Next: atlassian auth login")
 }
 
+func TestInit_ForwardsOAuthFlagsToLogin(t *testing.T) {
+	// init does not implement login; it re-enters `auth login` with a hand-built flag list.
+	// Every name in that list has to exist on both commands, or the flow dies with "unknown
+	// flag" — on init, before anything is attempted, and on login, after the user has already
+	// answered every prompt.
+	initCmd := newInitCmd(&globalOptions{})
+	loginCmd := newAuthLoginCmd(&globalOptions{})
+	for _, name := range []string{"method", "email", "token", "client-id", "scopes"} {
+		assert.NotNil(t, initCmd.Flags().Lookup(name), "init must accept --%s", name)
+		assert.NotNil(t, loginCmd.Flags().Lookup(name), "auth login must accept --%s for init to forward it", name)
+	}
+}
+
 func TestInit_RejectsCleartextRemoteURL(t *testing.T) {
 	isolateHome(t)
 	// An API token over plain http to a remote host is a disclosed credential.

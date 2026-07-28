@@ -41,7 +41,7 @@ atlassian auth login                                   # Cloud: email + API toke
       --method string          auth method: basic|pat|oauth2
       --mode string            OAuth redirect handling: auto|local|oob (default "auto")
       --port int               loopback port for the OAuth redirect — must match the callback URL registered on the app (default 8990)
-      --scopes string          OAuth scopes to request (default "read:jira-work write:jira-work read:jira-user read:confluence-content.all write:confluence-content offline_access")
+      --scopes string          OAuth scopes to request (default "read:jira-work write:jira-work read:jira-user manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider read:servicedesk-request write:servicedesk-request manage:servicedesk-customer read:servicemanagement-insight-objects read:confluence-content.all read:confluence-content.summary write:confluence-content read:confluence-space.summary write:confluence-space write:confluence-file read:confluence-props write:confluence-props read:confluence-content.permission read:confluence-user read:confluence-groups write:confluence-groups search:confluence manage:confluence-configuration readonly:content.attachment:confluence offline_access")
       --token string           API token or personal access token (prompted if omitted)
 ```
 

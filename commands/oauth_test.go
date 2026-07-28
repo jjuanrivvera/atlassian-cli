@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -199,13 +200,42 @@ func TestResolveCloudID_SingleSiteIsUnambiguous(t *testing.T) {
 	assert.Equal(t, "only", got)
 }
 
-func TestDefaultOAuthScopesIncludeOfflineAccess(t *testing.T) {
-	// Without offline_access Atlassian issues no refresh token, the grant expires in an hour,
-	// and every command after that fails with no way to recover but a full re-login.
-	assert.Contains(t, defaultOAuthScopes, "offline_access")
-	assert.Contains(t, defaultOAuthScopes, "read:jira-work")
-	assert.Contains(t, defaultOAuthScopes, "write:jira-work")
-	assert.Contains(t, defaultOAuthScopes, "read:confluence-content.all")
+func TestDefaultOAuthScopesMatchTheAppRegistration(t *testing.T) {
+	// Atlassian freezes the granted set at the moment a user consents, so a scope added to the
+	// app afterwards forces every existing user to re-consent. The requested list must
+	// therefore match what the app registers: a registered scope that is never requested is
+	// dead weight on the consent screen, and a requested scope that is not registered fails
+	// the authorize call outright. This list is the classic scope set of all four products.
+	want := []string{
+		// Jira platform
+		"read:jira-work", "write:jira-work", "read:jira-user",
+		"manage:jira-project", "manage:jira-configuration",
+		"manage:jira-webhook", "manage:jira-data-provider",
+		// Jira Service Management
+		"read:servicedesk-request", "write:servicedesk-request",
+		"manage:servicedesk-customer", "read:servicemanagement-insight-objects",
+		// Confluence
+		"read:confluence-content.all", "read:confluence-content.summary",
+		"write:confluence-content", "read:confluence-space.summary",
+		"write:confluence-space", "write:confluence-file",
+		"read:confluence-props", "write:confluence-props",
+		"read:confluence-content.permission", "read:confluence-user",
+		"read:confluence-groups", "write:confluence-groups",
+		"search:confluence", "manage:confluence-configuration",
+		"readonly:content.attachment:confluence",
+		// Without offline_access Atlassian issues no refresh token, the grant expires in an
+		// hour, and every command after that fails with no way back but a full re-login.
+		"offline_access",
+	}
+
+	got := strings.Fields(defaultOAuthScopes)
+	assert.ElementsMatch(t, want, got)
+
+	seen := make(map[string]bool, len(got))
+	for _, s := range got {
+		require.False(t, seen[s], "scope %q requested twice", s)
+		seen[s] = true
+	}
 }
 
 // newLocalListener binds a loopback port for the callback-server tests.

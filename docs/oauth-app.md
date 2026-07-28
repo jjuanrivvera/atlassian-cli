@@ -45,30 +45,40 @@ between them. You can change this later without recreating the app.
 
 ## 3. Add permissions (scopes)
 
-**Permissions** in the left menu. For each product you want, click **Add**, then
-**Configure**, then tick the scopes.
+**Permissions** in the left menu. Add **Confluence API** and **Jira API**, then **Configure**
+each and tick the scopes. Stay on the **Classic scopes** tab — the granular equivalents run to
+several hundred entries and Atlassian caps an app at 50.
 
-Jira API — the minimum for what the CLI does:
+The Jira API page has **two sections with their own Edit buttons**: *Jira platform REST API*
+and *Jira Service Management API*. Configuring the first and stopping is the easy mistake —
+every JSM command 403s and there is no hint as to why.
 
-| Scope | Needed for |
+`atlassian auth login` requests all 26 by default, which is the full classic set:
+
+| API | Scopes |
 |---|---|
-| `read:jira-work` | reading issues, projects, fields, boards |
-| `write:jira-work` | creating issues, commenting, transitioning |
-| `read:jira-user` | resolving assignee names to accountIds |
-| `manage:jira-project` | project/version/component administration (optional) |
+| Jira platform (7) | `read:jira-work` `write:jira-work` `read:jira-user` `manage:jira-project` `manage:jira-configuration` `manage:jira-webhook` `manage:jira-data-provider` |
+| Jira Service Management (4) | `read:servicedesk-request` `write:servicedesk-request` `manage:servicedesk-customer` `read:servicemanagement-insight-objects` |
+| Confluence (15) | `read:confluence-content.all` `read:confluence-content.summary` `write:confluence-content` `read:confluence-space.summary` `write:confluence-space` `write:confluence-file` `read:confluence-props` `write:confluence-props` `read:confluence-content.permission` `read:confluence-user` `read:confluence-groups` `write:confluence-groups` `search:confluence` `manage:confluence-configuration` `readonly:content.attachment:confluence` |
 
-Confluence API, if the site has Confluence:
-
-| Scope | Needed for |
-|---|---|
-| `read:confluence-content.all` | reading pages, spaces, blog posts |
-| `write:confluence-content` | creating and editing pages |
-| `search:confluence` | CQL search |
+Plus `offline_access`, which the CLI adds itself.
 
 !!! warning "Scopes are fixed once people start using the app"
-    Adding a scope later forces **every existing user to re-consent**. Decide the set now
-    rather than discovering it endpoint by endpoint. If unsure, include the read scopes for
-    both products.
+    Adding a scope later forces **every existing user to re-consent**. That is why the default
+    is the whole set rather than a minimal one: the alternative is discovering the gap one
+    403 at a time, in front of your users.
+
+A wide scope list looks alarming and mostly isn't. A scope **caps** what the token may do; it
+never grants the person anything they don't already have. `manage:jira-configuration` held by
+someone who is not a Jira admin still cannot change a global setting.
+
+If you would rather show a smaller consent screen, request less — the app can register more
+than a given login asks for:
+
+```sh
+atlassian auth login --method oauth2 --client-id <id> \
+  --scopes 'read:jira-work read:jira-user read:confluence-content.all offline_access'
+```
 
 ## 4. Set the callback URL
 
@@ -98,10 +108,10 @@ public client safe without one. Leave the secret prompt blank unless you have a 
 ## 6. Log in
 
 ```sh
-atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2
+atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2 --client-id <id>
 ```
 
-It prompts for the client id, prints the exact callback URL it will use, opens the authorize
+Leave `--client-id` off and it prompts. It prints the exact callback URL it will use, opens the authorize
 page, catches the redirect, exchanges the code with PKCE, resolves your site's cloud id, and
 verifies the token against `/myself` before saving anything.
 
@@ -148,4 +158,6 @@ developer account.
 | `no accessible site matches <url>` | Account-level access returned several sites and none matched your base URL exactly. The error lists what the token can reach; copy the right one into `atlassian config set base_url`. Resource-level has no such failure mode. |
 | Consent screen lists no products | No scopes added. Go back to **Permissions**. |
 | `403` after a successful login | The token authenticated but lacks a scope for that call. Add it, then re-consent. |
+| `403` on every JSM command only | The *Jira Service Management API* section of the Jira API page was never configured. It has its own **Edit Scopes** button below the platform one. |
+| `invalid_scope` on the authorize page | A scope was requested that the app does not register. Compare `--scopes` against **Permissions**. |
 | Works for an hour, then fails | `offline_access` was not granted. Re-run `auth login`. |

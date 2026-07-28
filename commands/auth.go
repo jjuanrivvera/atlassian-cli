@@ -372,15 +372,35 @@ func resolveCloudID(ctx context.Context, accessToken, baseURL string) (string, e
 	return "", fmt.Errorf("no accessible site matches %s (token can reach: %s)", baseURL, strings.Join(names, ", "))
 }
 
-// defaultOAuthScopes covers read and write across Jira and Confluence, plus offline_access
-// for the refresh token — without offline_access the grant expires in an hour and every
-// subsequent command would fail.
 // DefaultOAuthPort is the loopback port the redirect listener binds by default. It is fixed
 // because it forms part of the redirect_uri registered on the Atlassian app.
 const DefaultOAuthPort = 8990
 
+// defaultOAuthScopes is every classic scope across the four products, plus offline_access.
+//
+// It is deliberately the full set rather than a read-only or Jira-only subset. A scope the
+// app did not request is not merely degraded — the call 403s, and the fix is a re-consent by
+// every user of the app, because Atlassian freezes the granted set at consent time. Since
+// this CLI's premise is that all 1,143 documented operations are reachable, a narrower
+// default would mean discovering the gap one endpoint at a time in front of users.
+//
+// A scope caps what the token may do; it never grants the human anything they do not already
+// have. manage:jira-configuration held by a non-admin still cannot change global settings.
+// Anyone who wants a smaller consent screen passes --scopes.
+//
+// Classic scopes are used throughout: the granular equivalents would run to several hundred
+// entries, and Atlassian caps an app at 50.
 const defaultOAuthScopes = "read:jira-work write:jira-work read:jira-user " +
-	"read:confluence-content.all write:confluence-content offline_access"
+	"manage:jira-project manage:jira-configuration manage:jira-webhook manage:jira-data-provider " +
+	"read:servicedesk-request write:servicedesk-request manage:servicedesk-customer " +
+	"read:servicemanagement-insight-objects " +
+	"read:confluence-content.all read:confluence-content.summary write:confluence-content " +
+	"read:confluence-space.summary write:confluence-space write:confluence-file " +
+	"read:confluence-props write:confluence-props read:confluence-content.permission " +
+	"read:confluence-user read:confluence-groups write:confluence-groups " +
+	"search:confluence manage:confluence-configuration " +
+	"readonly:content.attachment:confluence " +
+	"offline_access"
 
 type oauthParams struct {
 	ClientID     string
