@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-07-28
+
+### Fixed
+
+- **`--client-id` help contradicted the command's own error**, still claiming a default of
+  "this CLI's own registered app" after 0.2.0 established that no such app can exist. Both
+  OAuth flags now say where the value comes from.
+
 ## [0.2.0] - 2026-07-28
 
 Everything below the OAuth section came out of running all 68 read commands against a live
@@ -118,7 +126,8 @@ First release.
   formula-injection neutralization and terminal-escape sanitization.
 - `--dry-run` printing the equivalent curl with the credential redacted.
 
-[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jjuanrivvera/atlassian-cli/releases/tag/v0.1.0
