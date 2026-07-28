@@ -4,26 +4,25 @@
 
 ## What this covers
 
-The `atlassian` command-line program and its OAuth application registration. The software
-itself is licensed under the
+The `atlassian` command-line program. It is licensed under the
 [MIT License](https://github.com/jjuanrivvera/atlassian-cli/blob/main/LICENSE), which governs
-your use of the code; these terms cover the OAuth app and the project's obligations to you.
+your use of the code; these terms state the project's obligations to you alongside it.
 
 Using the program means accepting both.
 
 ## What you get
 
-Permission to use the program for any purpose, commercial or otherwise, per the MIT License,
-including the use of this project's registered OAuth application to obtain your own Atlassian
-tokens.
+Permission to use the program for any purpose, commercial or otherwise, per the MIT License.
+
+The program ships no credentials. Authentication uses either your own Atlassian API token or
+an OAuth app you register yourself, so there is no shared service between you and anyone
+else.
 
 ## What is asked of you
 
 - Use it only against Atlassian instances you are authorised to access.
 - Follow Atlassian's own terms and API policies. This program is a client; it does not widen
   what you are permitted to do, and your account's permissions still apply to every call.
-- Do not use the shared OAuth app registration to build a different product. Register your
-  own — it is free, and `--client-id` exists for exactly this.
 - Do not use it to place unreasonable load on Atlassian's API. The program honours
   `Retry-After` and adapts to rate-limit headers; do not work around that.
 
@@ -44,10 +43,9 @@ arising from the software or its use, whether in contract, tort or otherwise.
 
 ## Availability
 
-Provided on a best-effort basis with no uptime or support commitment. The OAuth app
-registration may be changed or withdrawn — if that happens, API-token authentication
-(`atlassian init`) continues to work unaffected, and you can register your own app and pass
-`--client-id`.
+Provided on a best-effort basis with no uptime or support commitment. There is no hosted
+component that can go down: the program runs entirely on your machine and talks to your own
+Atlassian instance.
 
 Support is community best-effort through
 [GitHub issues](https://github.com/jjuanrivvera/atlassian-cli/issues).

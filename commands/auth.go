@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -49,14 +50,15 @@ Whichever you use, the secret goes to the OS keyring — never to the config fil
 
 func newAuthLoginCmd(o *globalOptions) *cobra.Command {
 	var (
-		method   string
-		email    string
-		token    string
-		clientID string
-		secret   string
-		mode     string
-		scopes   string
-		port     int
+		method    string
+		email     string
+		token     string
+		clientID  string
+		secret    string
+		mode      string
+		scopes    string
+		port      int
+		noBrowser bool
 	)
 
 	cmd := &cobra.Command{
@@ -68,20 +70,24 @@ saving — so a typo fails here rather than on the next command.
 
 The token is read without echoing when the terminal is interactive; pass --token to script it.
 
---method oauth2 needs no setup: it uses this CLI's own registered app, opens your browser for
-consent, and catches the redirect on http://127.0.0.1:8990/callback. Consent is per user and
-per site, and you can revoke it at any time at https://id.atlassian.com/manage-profile/apps.
+--method oauth2 needs an app you registered at https://developer.atlassian.com/console/myapps/,
+and both its client id and its secret. Atlassian has no public-client mode — PKCE is used but
+does not replace the secret — so there is no built-in app to borrow. An API token needs no app
+at all and is the simpler choice unless you specifically want per-user consent and revocation.
 
-Pass --client-id to consent through your own app instead — for your own audit trail, or to be
-free of this app's rate limits. Register it with that same callback URL: Atlassian matches it
-exactly and supports no wildcard port, which is why the port is fixed rather than chosen per
-run. Use --port if something else holds it (and register the matching URL), or --mode oob to
-paste the code by hand on a machine with no browser.`),
+Register the app's callback URL as exactly:
+
+    http://127.0.0.1:8990/callback
+
+Atlassian matches that exactly and supports no wildcard port, which is why the port is fixed
+rather than chosen per run. It opens your browser automatically and catches the redirect
+there; revoke the consent later at https://id.atlassian.com/manage-profile/apps. Use --port if
+something else holds the port (and register the matching URL), --no-browser to print the URL
+instead of opening it, or --mode oob to paste the code by hand where no browser is reachable.`),
 		Example: strings.TrimSpace(`
   atlassian auth login                        # Cloud: email + API token
   atlassian auth login --method pat           # Data Center: personal access token
-  atlassian auth login --method oauth2        # Cloud: OAuth 2.0 (3LO), no app setup
-  atlassian auth login --method oauth2 --client-id <id>   # ...through your own app
+  atlassian auth login --method oauth2 --client-id <id> --client-secret <secret>
   atlassian auth login --email me@example.com --token "$ATLASSIAN_API_TOKEN"`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, err := config.Load()
@@ -146,21 +152,36 @@ paste the code by hand on a machine with no browser.`),
 					clientID = site.ClientID
 				}
 				if clientID == "" {
-					clientID = DefaultOAuthClientID
-				}
-				if clientID == "" {
-					return fmt.Errorf("an OAuth client id is required (create an app at https://developer.atlassian.com/console/myapps/)")
-				}
-				// A public client has no secret to prompt for. Asking anyway taught the first
-				// users that they were missing something they had to go and find.
-				if secret == "" && clientID != DefaultOAuthClientID {
-					secret, err = promptSecret(cmd, "OAuth client secret (blank for a public client): ")
-					if err != nil {
+					fmt.Fprintln(cmd.ErrOrStderr(),
+						"OAuth needs an app you registered: https://developer.atlassian.com/console/myapps/")
+					// EOF means nothing was piped in, which is a missing value rather than a
+					// failure to read one. Reporting it as "EOF" tells the user nothing; fall
+					// through to the errors below, which say what is missing and where to get it.
+					clientID, err = promptLine(cmd, "OAuth client id: ")
+					if err != nil && !errors.Is(err, io.EOF) {
 						return err
 					}
 				}
+				if clientID == "" {
+					return fmt.Errorf("an OAuth client id is required: register an app at https://developer.atlassian.com/console/myapps/ and pass --client-id")
+				}
+				if secret == "" {
+					secret, err = promptSecret(cmd, "OAuth client secret: ")
+					if err != nil && !errors.Is(err, io.EOF) {
+						return err
+					}
+				}
+				// Not optional, however much it looks like it should be. Atlassian's token
+				// endpoint advertises only client_secret_basic and client_secret_post — no
+				// `none` — so there is no public-client mode, and PKCE does not substitute.
+				// Failing here beats failing after the user has already consented in a browser.
+				if secret == "" {
+					return fmt.Errorf("an OAuth client secret is required: Atlassian authenticates the client with a secret " +
+						"and does not accept PKCE in its place\n\nuse an API token instead (atlassian init) if you would rather not register an app")
+				}
 				tok, err := runOAuthFlow(cmd, oauthParams{
-					ClientID: clientID, ClientSecret: secret, Mode: mode, Scopes: scopes, Port: port,
+					ClientID: clientID, ClientSecret: secret, Mode: mode, Scopes: scopes,
+					Port: port, NoBrowser: noBrowser,
 				})
 				if err != nil {
 					return err
@@ -220,6 +241,7 @@ paste the code by hand on a machine with no browser.`),
 	cmd.Flags().IntVar(&port, "port", DefaultOAuthPort,
 		"loopback port for the OAuth redirect — must match the callback URL registered on the app")
 	cmd.Flags().StringVar(&scopes, "scopes", defaultOAuthScopes, "OAuth scopes to request")
+	cmd.Flags().BoolVar(&noBrowser, "no-browser", false, "print the authorize URL instead of opening a browser")
 	annotate(cmd, kindWrite)
 	cmd.Annotations["atlassianLocal"] = "true"
 	return cmd
@@ -377,20 +399,23 @@ func resolveCloudID(ctx context.Context, accessToken, baseURL string) (string, e
 // because it forms part of the redirect_uri registered on the Atlassian app.
 const DefaultOAuthPort = 8990
 
-// DefaultOAuthClientID is this CLI's own registered Atlassian app, so that `auth login
-// --method oauth2` works with no developer-console setup at all.
+// No built-in client id ships with this CLI, and none can.
 //
-// Publishing it is not a leak. In an authorization-code + PKCE flow the client id is a public
-// identifier, not a credential: it is sent in the browser URL of every login, and possession
-// of it grants nothing. What protects the exchange is the PKCE verifier, which never leaves
-// the machine, plus the registered redirect_uri — Atlassian will only ever redirect to
-// 127.0.0.1 on the ports below, so a token minted with this id can only land back on the
-// user's own loopback interface.
+// The obvious design — register one app, bake its client id into the binary, let everyone
+// consent through it — is what most CLIs do and what Atlassian does not allow. Their identity
+// server advertises `token_endpoint_auth_methods_supported: [client_secret_basic,
+// client_secret_post]`, with no `none`: every client is confidential, so redeeming an
+// authorization code requires the app's secret. PKCE is offered (S256) but only as a
+// challenge method, never in place of client authentication, and the device grant is
+// disabled for 3LO apps. Shipping the secret to make it work is explicitly against
+// Atlassian's guidance, which says to distribute authorization URLs and never the secret.
 //
-// Consent is still per user and per site, and revocable by them at any time from
-// id.atlassian.com. Anyone who would rather consent through their own app — for their own
-// audit trail, or to be free of this app's rate limits — passes --client-id.
-const DefaultOAuthClientID = "tY1ReDA2lPorOmh9BcLmBxqm1v8i9oDc"
+// So OAuth here is bring-your-own-app, which is Atlassian's own recommendation for
+// distributed clients. Public-client PKCE is tracked upstream as ECO-283 (Gathering
+// Interest); if it ever ships, a built-in client id becomes possible and this comment is the
+// reason it was not done sooner.
+//
+// None of this constrains the default path: an API token needs no app at all.
 
 // defaultOAuthScopes is every classic scope across the four products, plus offline_access.
 //
@@ -423,6 +448,10 @@ type oauthParams struct {
 	ClientSecret string
 	Mode         string
 	Scopes       string
+	// NoBrowser prints the authorize URL instead of launching a browser. Needed where the
+	// opener would succeed but land somewhere the user cannot see it — a remote shell with
+	// X11 forwarding, a container with xdg-open installed.
+	NoBrowser bool
 	// Port is the loopback port the redirect listener binds. It is part of the redirect_uri
 	// the user registers on the app, so it must not vary between runs.
 	Port int
@@ -506,12 +535,20 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 		"code_challenge_method": {"S256"},
 	}.Encode()
 
-	fmt.Fprintf(cmd.ErrOrStderr(),
-		"\nThe app's registered callback URL must be exactly:\n\n  %s\n\nOpen this URL to authorize:\n\n  %s\n\n",
-		redirectURI, authURL)
-
 	var code string
 	if mode == "local" {
+		// Open the browser rather than making the user copy a 700-character URL out of a
+		// terminal, where a soft-wrap or a trailing character silently breaks the PKCE
+		// exchange. The URL is still printed: the opener can fail silently (no default
+		// browser, a stale DISPLAY, an SSH session that looked local), and the user needs
+		// something to fall back on that does not mean starting over.
+		opened := !p.NoBrowser && openInBrowser(authURL) == nil
+		if opened {
+			fmt.Fprintf(cmd.ErrOrStderr(),
+				"\nOpening your browser to authorize.\nIf it did not open, use this URL:\n\n  %s\n\n", authURL)
+		} else {
+			fmt.Fprintf(cmd.ErrOrStderr(), "\nOpen this URL to authorize:\n\n  %s\n\n", authURL)
+		}
 		fmt.Fprintln(cmd.ErrOrStderr(), "Waiting for the redirect (Ctrl-C to cancel)...")
 		select {
 		case code = <-codeCh:
@@ -521,6 +558,10 @@ func runOAuthFlow(cmd *cobra.Command, p oauthParams) (*oauthToken, error) {
 			return nil, fmt.Errorf("timed out waiting for the OAuth redirect")
 		}
 	} else {
+		// OOB means no browser is reachable here, so never try to launch one — print only.
+		fmt.Fprintf(cmd.ErrOrStderr(),
+			"\nThe app's registered callback URL must be exactly:\n\n  %s\n\nOpen this URL to authorize:\n\n  %s\n\n",
+			redirectURI, authURL)
 		// The authorization code is short-lived but still a credential; read it hidden.
 		code, err = promptSecret(cmd, "Paste the `code` parameter from the redirect URL: ")
 		if err != nil {
@@ -604,6 +645,19 @@ func exchangeCode(ctx context.Context, p oauthParams, code, verifier, redirectUR
 		}
 		if msg == "" {
 			msg = resp.Status
+		}
+		// Atlassian's 3LO token endpoint requires client_secret and does not implement PKCE,
+		// so a public client cannot complete the exchange — it authorizes, issues a code, then
+		// rejects the redemption. The bare "Unauthorized" that comes back gives no clue which
+		// of the many OAuth misconfigurations it is, so name the likely one.
+		if p.ClientSecret == "" && (resp.StatusCode == http.StatusUnauthorized || tok.Error == "unauthorized_client") {
+			return nil, fmt.Errorf(
+				"exchange authorization code: %s\n\n"+
+					"this is what a missing client secret looks like: Atlassian authenticates the client\n"+
+					"with a secret and does not accept PKCE in its place, so the browser consent succeeds\n"+
+					"and only the exchange fails\n\n"+
+					"pass --client-secret from your app's Settings page, or use an API token instead\n"+
+					"(atlassian init), which needs no app at all", msg)
 		}
 		return nil, fmt.Errorf("exchange authorization code: %s", msg)
 	}

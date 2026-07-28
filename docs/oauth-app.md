@@ -1,28 +1,28 @@
-# OAuth
+# Creating an OAuth developer app
 
-## You probably don't need this page
+You only need this if you want `--method oauth2`. **Most people should not.** An API token
+(`atlassian init`) takes 30 seconds, needs no app, no callback URL and no refresh handling, and
+gives the CLI exactly your own permissions.
 
-`--method oauth2` works with no setup at all — the CLI ships its own registered app:
-
-```sh
-atlassian auth login --method oauth2
-```
-
-That opens your browser, asks you to consent, and stores the token in your keyring. Revoke it
-whenever you like at
-[id.atlassian.com/manage-profile/apps](https://id.atlassian.com/manage-profile/apps).
-
-An API token (`atlassian init`) is still the simpler default: 30 seconds, no browser, no
-refresh handling. OAuth earns its keep when you want per-user consent and revocation rather
+OAuth earns its complexity in one situation: you want per-user consent and revocation rather
 than everyone minting a personal token.
 
-The rest of this page is for **registering your own app**, which you'd do to keep your own
-audit trail of consents, to avoid sharing this project's rate limits, or because your
-organisation requires apps to be registered internally. Then:
+!!! info "Why there is no built-in app to borrow"
+    Most CLIs ship a client id so OAuth works out of the box. Atlassian does not permit it.
+    Its identity server advertises `token_endpoint_auth_methods_supported:
+    [client_secret_basic, client_secret_post]` — **no `none`** — so every 3LO client is
+    confidential and redeeming an authorization code requires the app's *secret*. PKCE is
+    supported (`S256`) but only as a challenge method, never in place of client
+    authentication, and the device grant is disabled for 3LO apps. Shipping the secret to
+    work around it is [explicitly against Atlassian's
+    guidance](https://developer.atlassian.com/cloud/oauth/getting-started/managing-oauth-apps/),
+    which says to distribute authorization URLs and never the secret.
 
-```sh
-atlassian auth login --method oauth2 --client-id <your id>
-```
+    Registering your own app is [Atlassian's own recommendation for distributed
+    clients](https://community.developer.atlassian.com/t/oauth-2-0-with-proof-key-for-code-exchange-pkce/80173).
+    Public-client PKCE is tracked as [ECO-283](https://jira.atlassian.com/browse/ECO-283),
+    still *Gathering Interest*. The symptom, if you try it anyway: the browser consent
+    succeeds and the token exchange returns `401 Unauthorized`.
 
 ---
 
@@ -70,7 +70,8 @@ The Jira API page has **two sections with their own Edit buttons**: *Jira platfo
 and *Jira Service Management API*. Configuring the first and stopping is the easy mistake —
 every JSM command 403s and there is no hint as to why.
 
-`atlassian auth login` requests all 26 by default, which is the full classic set:
+`atlassian auth login` requests all 26 by default, which is the full classic set. Tick all of
+them unless you have a reason not to:
 
 | API | Scopes |
 |---|---|
@@ -83,7 +84,8 @@ Plus `offline_access`, which the CLI adds itself.
 !!! warning "Scopes are fixed once people start using the app"
     Adding a scope later forces **every existing user to re-consent**. That is why the default
     is the whole set rather than a minimal one: the alternative is discovering the gap one
-    403 at a time, in front of your users.
+    403 at a time. If the app is only ever used by you, this matters less — re-consenting is
+    one browser round trip.
 
 A wide scope list looks alarming and mostly isn't. A scope **caps** what the token may do; it
 never grants the person anything they don't already have. `manage:jira-configuration` held by
@@ -119,18 +121,23 @@ Save.
 
 **Settings** in the left menu → copy the **Client ID**.
 
-The **Secret** on the same page is optional for this CLI: it uses PKCE, which is what makes a
-public client safe without one. Leave the secret prompt blank unless you have a reason.
+Copy the **Secret** from the same page too. It is not optional: Atlassian authenticates the
+client with it and accepts no substitute, so a login without it consents in the browser and
+then fails at the token exchange. The CLI stores it in your OS keyring alongside the tokens,
+never in the config file.
 
 ## 6. Log in
 
 ```sh
-atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2 --client-id <your id>
+atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2 \
+  --client-id <your id>
 ```
 
-Leave `--client-id` off and it uses the built-in app. It prints the exact callback URL it will use, opens the authorize
-page, catches the redirect, exchanges the code with PKCE, resolves your site's cloud id, and
+It prompts for the secret without echoing, prints the exact callback URL it will use, opens
+your browser, catches the redirect, exchanges the code, resolves your site's cloud id, and
 verifies the token against `/myself` before saving anything.
+
+`--no-browser` prints the URL instead of opening one.
 
 On a machine with no browser:
 
@@ -143,8 +150,15 @@ parameter from the redirect.
 
 ## 7. Sharing it with other people (optional)
 
-**Distribution** in the left menu → toggle sharing on. Users will see a warning that the app
-has not been reviewed by Atlassian until you take it through Marketplace review.
+**Distribution** in the left menu → toggle sharing on, and supply a vendor name, privacy
+policy, terms and a personal-data declaration.
+
+Worth being clear about what this does and does not buy you: sharing lets other people
+*consent* to your app, but they still cannot complete a login without its **secret**, and
+handing that out is exactly what Atlassian tells you not to do. So sharing is for teams who
+will distribute the secret internally through their own secret management — not a way to
+publish a CLI that anyone can `brew install` and log into. For that, point people at
+`atlassian init` and an API token.
 
 ---
 
@@ -177,4 +191,5 @@ developer account.
 | `403` after a successful login | The token authenticated but lacks a scope for that call. Add it, then re-consent. |
 | `403` on every JSM command only | The *Jira Service Management API* section of the Jira API page was never configured. It has its own **Edit Scopes** button below the platform one. |
 | `invalid_scope` on the authorize page | A scope was requested that the app does not register. Compare `--scopes` against **Permissions**. |
+| Consent succeeds, then `exchange authorization code: Unauthorized` | No client secret. Atlassian has no public-client mode; pass `--client-secret`. |
 | Works for an hour, then fails | `offline_access` was not granted. Re-run `auth login`. |

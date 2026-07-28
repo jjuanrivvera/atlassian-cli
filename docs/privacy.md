@@ -44,17 +44,17 @@ Only these hosts, and only when a command needs them:
 
 ## OAuth consent
 
-`atlassian auth login --method oauth2` uses an Atlassian OAuth app registered by this
-project. That app is an identifier used to request consent; it is not a service, and it
-receives no data. The resulting token is issued by Atlassian directly to your machine and
-stored in your keyring.
+`atlassian auth login --method oauth2` uses an OAuth app **you** register in Atlassian's
+developer console — this project ships no app and no credentials of its own, because
+Atlassian requires a client secret and does not permit distributing one. The resulting token
+is issued by Atlassian directly to your machine and stored in your keyring. Nothing about the
+consent reaches this project's author.
 
 The token can do only what the requested scopes allow **and** what your own Atlassian
 account already permits — a scope never grants you access you did not already have.
 
 Revoke consent at any time at
-[id.atlassian.com/manage-profile/apps](https://id.atlassian.com/manage-profile/apps). To
-avoid this project's app entirely, register your own and pass `--client-id`.
+[id.atlassian.com/manage-profile/apps](https://id.atlassian.com/manage-profile/apps).
 
 ## Children
 

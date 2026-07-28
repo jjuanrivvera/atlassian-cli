@@ -172,3 +172,38 @@ No `coverage-waiver` is claimed: coverage is 100% of the enumerated total.
 
 **Why.** GOAL.md §11 forbids hand-picking "the important ones" as the membership rule. Priority
 ordering is a human input; membership is derived from the enumeration.
+
+### 14. Why is there no built-in OAuth client id?
+
+**Decision.** OAuth is bring-your-own-app: `--method oauth2` requires both `--client-id` and
+`--client-secret` from an app the user registered. The CLI ships no OAuth credentials, and
+`auth login` fails fast with an explanation when the secret is missing.
+
+**Why.** The obvious design — register one app, embed its client id, let everyone consent
+through it — is what most CLIs do and Atlassian does not permit it. Measured from
+`auth.atlassian.com/.well-known/openid-configuration`:
+
+```json
+"code_challenge_methods_supported":      ["S256"],
+"token_endpoint_auth_methods_supported": ["client_secret_basic", "client_secret_post"]
+```
+
+No `none`, so every 3LO client is confidential: redeeming an authorization code requires the
+app's *secret*. PKCE exists but only as a challenge method, never in place of client
+authentication. The device-authorization endpoint is advertised but returns `grant_type is not
+enabled for client` for 3LO apps. Embedding the secret to compensate is against Atlassian's
+distribution guidance, which says to share authorization URLs and never the secret.
+
+The failure mode this causes is worth naming, because it looks like anything but a missing
+secret: the browser consent **succeeds**, a code is issued, and the exchange then returns a
+bare `401 Unauthorized`. That is why `exchangeCode` special-cases it.
+
+Registering per-user apps is Atlassian's own recommendation for distributed clients. Upstream
+tracking: ECO-283 (Cloud, "Gathering Interest"), OAUTH20-2491 (Data Center, open). If
+public-client PKCE ships, a built-in client id becomes possible and this decision can be
+revisited.
+
+**Consequence for distribution.** None for the default path — an API token needs no app, so
+`atlassian init` remains the install-and-go route for everyone. Sharing an OAuth app in the
+developer console does not make it usable by strangers, since they still cannot complete an
+exchange without its secret.

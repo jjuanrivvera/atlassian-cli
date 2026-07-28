@@ -53,10 +53,6 @@ atlassian init          # site URL + credentials, verified before they are saved
 atlassian doctor        # config, credentials, connectivity, per-product licensing
 ```
 
-Prefer a browser to an API token? `atlassian auth login --method oauth2` consents through the
-CLI's own registered app — no developer console, no callback URL, revocable from your
-Atlassian profile.
-
 ```sh
 # Jira
 atlassian issues list --jql 'project = PP AND status = "In Progress"'
@@ -167,8 +163,8 @@ Credentials go to the OS keyring — never to the config file. On a headless box
 |---|---|
 | [Command reference](https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian/) | Every command, generated from the binary |
 | [Comparison](docs/comparison.md) | Against Atlassian's Rovo MCP server, `acli` and `jira-cli` |
-| [OAuth](docs/oauth-app.md) | `--method oauth2`, and registering your own app if you want one |
-| [Privacy](docs/privacy.md) · [Terms](docs/terms.md) | What it stores, what it contacts, and the terms of the shared OAuth app |
+| [OAuth setup](docs/oauth-app.md) | Registering a developer app, if you want `--method oauth2` |
+| [Privacy](docs/privacy.md) · [Terms](docs/terms.md) | What it stores locally, and what it contacts |
 | [DECISIONS.md](DECISIONS.md) | Why the CLI behaves the way it does |
 | [AGENTS.md](AGENTS.md) | Contributing, and the build gate |
 
