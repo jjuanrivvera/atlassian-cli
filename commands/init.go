@@ -134,7 +134,7 @@ Run it again with a different --name to add a second site; switch between them w
 	cmd.Flags().StringVar(&method, "method", "", "auth method: basic|pat|oauth2 (inferred from the deployment)")
 	cmd.Flags().StringVar(&email, "email", "", "account email (Cloud basic auth)")
 	cmd.Flags().StringVar(&token, "token", "", "API token or personal access token (prompted if omitted)")
-	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id (--method oauth2; prompted if omitted)")
+	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id (--method oauth2; defaults to this CLI's own registered app)")
 	cmd.Flags().StringVar(&scopes, "scopes", "", "OAuth scopes to request (--method oauth2; defaults to the full set)")
 	cmd.Flags().BoolVar(&skipLogin, "skip-login", false, "register the site without capturing credentials")
 	annotate(cmd, kindWrite)

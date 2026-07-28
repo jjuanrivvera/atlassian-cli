@@ -39,6 +39,8 @@ nav:
   - OAuth setup: oauth-app.md
   - Comparison: comparison.md
   - Command reference: commands/atlassian.md
+  - Privacy policy: privacy.md
+  - Terms of service: terms.md
 
 plugins:
   - search

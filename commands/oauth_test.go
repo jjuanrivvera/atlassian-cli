@@ -200,6 +200,21 @@ func TestResolveCloudID_SingleSiteIsUnambiguous(t *testing.T) {
 	assert.Equal(t, "only", got)
 }
 
+func TestDefaultOAuthClientIDIsSetAndPublic(t *testing.T) {
+	// The CLI ships its own registered app so `auth login --method oauth2` needs no
+	// developer-console setup. Under authorization-code + PKCE the client id is a public
+	// identifier — it travels in the browser URL of every login — so this is not a secret
+	// leaking into the binary, and no client secret may accompany it.
+	assert.NotEmpty(t, DefaultOAuthClientID)
+	assert.NotContains(t, defaultOAuthScopes, DefaultOAuthClientID)
+
+	// A login that falls back to the built-in app must not ask for a secret it cannot have.
+	login := newAuthLoginCmd(&globalOptions{})
+	require.NotNil(t, login.Flags().Lookup("client-secret"))
+	assert.Equal(t, "", login.Flags().Lookup("client-secret").DefValue,
+		"the built-in app is a public client; a default secret would be a real leak")
+}
+
 func TestDefaultOAuthScopesMatchTheAppRegistration(t *testing.T) {
 	// Atlassian freezes the granted set at the moment a user consents, so a scope added to the
 	// app afterwards forces every existing user to re-consent. The requested list must
@@ -256,7 +271,13 @@ func TestOAuthRedirectURIIsStable(t *testing.T) {
 	require.NotNil(t, portFlag, "--port must exist so a busy default can be moved")
 	assert.Equal(t, "8990", portFlag.DefValue)
 
-	// The help must state the exact URL to register; the flow fails confusingly otherwise.
+	// Anyone registering their own app has to reproduce this URL exactly, so the help has to
+	// state it. (It no longer needs to name the developer console: the built-in app means the
+	// default path never visits it, and --client-id is documented for the case that does.)
 	assert.Contains(t, login.Long, "http://127.0.0.1:8990/callback")
-	assert.Contains(t, login.Long, "developer.atlassian.com/console/myapps")
+	assert.Contains(t, login.Long, "--client-id")
+
+	// Revocation is the counterweight to shipping a shared app: a user who consents through
+	// it must be told, at the point of consent, how to take that consent back.
+	assert.Contains(t, login.Long, "id.atlassian.com/manage-profile/apps")
 }

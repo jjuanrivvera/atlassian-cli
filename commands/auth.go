@@ -68,18 +68,20 @@ saving — so a typo fails here rather than on the next command.
 
 The token is read without echoing when the terminal is interactive; pass --token to script it.
 
-OAuth needs an app registered at https://developer.atlassian.com/console/myapps/ with its
-callback URL set to exactly:
+--method oauth2 needs no setup: it uses this CLI's own registered app, opens your browser for
+consent, and catches the redirect on http://127.0.0.1:8990/callback. Consent is per user and
+per site, and you can revoke it at any time at https://id.atlassian.com/manage-profile/apps.
 
-    http://127.0.0.1:8990/callback
-
-Atlassian matches that URL exactly and supports no wildcard port, which is why the port is
-fixed rather than chosen per run. Use --port if something else already holds it (and register
-the matching URL), or --mode oob to paste the code by hand on a machine with no browser.`),
+Pass --client-id to consent through your own app instead — for your own audit trail, or to be
+free of this app's rate limits. Register it with that same callback URL: Atlassian matches it
+exactly and supports no wildcard port, which is why the port is fixed rather than chosen per
+run. Use --port if something else holds it (and register the matching URL), or --mode oob to
+paste the code by hand on a machine with no browser.`),
 		Example: strings.TrimSpace(`
-  atlassian auth login                                   # Cloud: email + API token
-  atlassian auth login --method pat                      # Data Center: personal access token
-  atlassian auth login --method oauth2 --client-id <id>  # Cloud: OAuth 2.0 (3LO)
+  atlassian auth login                        # Cloud: email + API token
+  atlassian auth login --method pat           # Data Center: personal access token
+  atlassian auth login --method oauth2        # Cloud: OAuth 2.0 (3LO), no app setup
+  atlassian auth login --method oauth2 --client-id <id>   # ...through your own app
   atlassian auth login --email me@example.com --token "$ATLASSIAN_API_TOKEN"`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, err := config.Load()
@@ -144,15 +146,14 @@ the matching URL), or --mode oob to paste the code by hand on a machine with no 
 					clientID = site.ClientID
 				}
 				if clientID == "" {
-					clientID, err = promptLine(cmd, "OAuth client id: ")
-					if err != nil {
-						return err
-					}
+					clientID = DefaultOAuthClientID
 				}
 				if clientID == "" {
 					return fmt.Errorf("an OAuth client id is required (create an app at https://developer.atlassian.com/console/myapps/)")
 				}
-				if secret == "" {
+				// A public client has no secret to prompt for. Asking anyway taught the first
+				// users that they were missing something they had to go and find.
+				if secret == "" && clientID != DefaultOAuthClientID {
 					secret, err = promptSecret(cmd, "OAuth client secret (blank for a public client): ")
 					if err != nil {
 						return err
@@ -213,7 +214,7 @@ the matching URL), or --mode oob to paste the code by hand on a machine with no 
 	cmd.Flags().StringVar(&method, "method", "", "auth method: basic|pat|oauth2")
 	cmd.Flags().StringVar(&email, "email", "", "account email (basic auth)")
 	cmd.Flags().StringVar(&token, "token", "", "API token or personal access token (prompted if omitted)")
-	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id")
+	cmd.Flags().StringVar(&clientID, "client-id", "", "OAuth client id (defaults to this CLI's own registered app)")
 	cmd.Flags().StringVar(&secret, "client-secret", "", "OAuth client secret")
 	cmd.Flags().StringVar(&mode, "mode", "auto", "OAuth redirect handling: auto|local|oob")
 	cmd.Flags().IntVar(&port, "port", DefaultOAuthPort,
@@ -375,6 +376,21 @@ func resolveCloudID(ctx context.Context, accessToken, baseURL string) (string, e
 // DefaultOAuthPort is the loopback port the redirect listener binds by default. It is fixed
 // because it forms part of the redirect_uri registered on the Atlassian app.
 const DefaultOAuthPort = 8990
+
+// DefaultOAuthClientID is this CLI's own registered Atlassian app, so that `auth login
+// --method oauth2` works with no developer-console setup at all.
+//
+// Publishing it is not a leak. In an authorization-code + PKCE flow the client id is a public
+// identifier, not a credential: it is sent in the browser URL of every login, and possession
+// of it grants nothing. What protects the exchange is the PKCE verifier, which never leaves
+// the machine, plus the registered redirect_uri — Atlassian will only ever redirect to
+// 127.0.0.1 on the ports below, so a token minted with this id can only land back on the
+// user's own loopback interface.
+//
+// Consent is still per user and per site, and revocable by them at any time from
+// id.atlassian.com. Anyone who would rather consent through their own app — for their own
+// audit trail, or to be free of this app's rate limits — passes --client-id.
+const DefaultOAuthClientID = "tY1ReDA2lPorOmh9BcLmBxqm1v8i9oDc"
 
 // defaultOAuthScopes is every classic scope across the four products, plus offline_access.
 //

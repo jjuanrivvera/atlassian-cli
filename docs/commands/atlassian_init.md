@@ -26,7 +26,7 @@ atlassian init
 
 ```
       --base-url string     site URL, e.g. https://acme.atlassian.net
-      --client-id string    OAuth client id (--method oauth2; prompted if omitted)
+      --client-id string    OAuth client id (--method oauth2; defaults to this CLI's own registered app)
       --deployment string   cloud|datacenter (inferred from the URL when omitted)
       --email string        account email (Cloud basic auth)
   -h, --help                help for init

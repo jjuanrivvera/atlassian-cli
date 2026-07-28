@@ -1,11 +1,28 @@
-# Creating an OAuth developer app
+# OAuth
 
-You only need this if you want `--method oauth2`. **Most people should not.** An API token
-(`atlassian init`) takes 30 seconds, needs no app, no callback URL and no refresh handling, and
-gives the CLI exactly your own permissions.
+## You probably don't need this page
 
-OAuth earns its complexity in one situation: you are handing this to other people and want
-per-user consent and revocation rather than everyone minting a personal token.
+`--method oauth2` works with no setup at all — the CLI ships its own registered app:
+
+```sh
+atlassian auth login --method oauth2
+```
+
+That opens your browser, asks you to consent, and stores the token in your keyring. Revoke it
+whenever you like at
+[id.atlassian.com/manage-profile/apps](https://id.atlassian.com/manage-profile/apps).
+
+An API token (`atlassian init`) is still the simpler default: 30 seconds, no browser, no
+refresh handling. OAuth earns its keep when you want per-user consent and revocation rather
+than everyone minting a personal token.
+
+The rest of this page is for **registering your own app**, which you'd do to keep your own
+audit trail of consents, to avoid sharing this project's rate limits, or because your
+organisation requires apps to be registered internally. Then:
+
+```sh
+atlassian auth login --method oauth2 --client-id <your id>
+```
 
 ---
 
@@ -108,10 +125,10 @@ public client safe without one. Leave the secret prompt blank unless you have a 
 ## 6. Log in
 
 ```sh
-atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2 --client-id <id>
+atlassian init --name acme --base-url https://acme.atlassian.net --method oauth2 --client-id <your id>
 ```
 
-Leave `--client-id` off and it prompts. It prints the exact callback URL it will use, opens the authorize
+Leave `--client-id` off and it uses the built-in app. It prints the exact callback URL it will use, opens the authorize
 page, catches the redirect, exchanges the code with PKCE, resolves your site's cloud id, and
 verifies the token against `/myself` before saving anything.
 
