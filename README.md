@@ -144,9 +144,21 @@ atlassian issues list --site onprem --jql 'project = OPS'
 atlassian config use work
 ```
 
-Credentials go to the OS keyring — never to the config file. On a headless box, set
-`ATLASSIAN_KEYRING_PASSWORD` for the AES-256-GCM encrypted-file store, or force it with
-`ATLASSIAN_KEYRING_BACKEND=file`.
+Credentials go to the OS keyring — never to the config file. On a headless box with no
+keyring, the CLI uses an AES-256-GCM encrypted-file store, unlocked by a password it finds in
+this order: `ATLASSIAN_KEYRING_PASSWORD`, the file named by `ATLASSIAN_KEYRING_PASSWORD_FILE`,
+or a `keyring-password` file (mode `600`) in the config dir. Prefer a file over the env var:
+it needs no shell setup, so it works under a non-interactive `ssh host 'atlassian …'` or cron
+where `.bashrc`/`.zshrc` are never sourced — and the secret stays out of every child process's
+environment. Force the file store anywhere with `ATLASSIAN_KEYRING_BACKEND=file`.
+
+```sh
+# One-time headless setup — no shell rc editing, works in every context:
+umask 077
+mkdir -p ~/.atlassian-cli
+openssl rand -base64 33 | tr -d '\n' > ~/.atlassian-cli/keyring-password
+atlassian init --name work --base-url https://acme.atlassian.net --email me@acme.com
+```
 
 ## Safety
 

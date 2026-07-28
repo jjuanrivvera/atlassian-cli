@@ -30,6 +30,55 @@ const KeyringService = "atlassian-cli"
 // KeyringPasswordEnv unlocks the encrypted-file fallback.
 const KeyringPasswordEnv = "ATLASSIAN_KEYRING_PASSWORD"
 
+// KeyringPasswordFileEnv names a file to read the password from, for the common case where
+// exporting it into the shell does not reach the CLI: a non-interactive `ssh host 'atlassian
+// …'`, cron, or any bash invocation, none of which source .bashrc/.zshrc. Absent both env
+// vars, a `keyring-password` file in the config dir is read if present. A file is also
+// simply safer — the secret is not in the environment of every child process.
+const KeyringPasswordFileEnv = "ATLASSIAN_KEYRING_PASSWORD_FILE"
+
+// keyringPasswordFile is the default password-file name, read when neither env var is set.
+const keyringPasswordFile = "keyring-password"
+
+// keyringPassword resolves the encrypted-file password from, in order: the env var, a file
+// named by the file env var, or the default file in the config dir. Returning "" means none
+// was configured — the caller decides whether that is fatal.
+//
+// The file must not be readable by anyone but its owner: a password the whole machine can
+// read is not protecting the credential it encrypts, so a loose-permissions file is refused
+// rather than used, and the refusal is surfaced (not swallowed) so it cannot look like
+// "no password configured".
+func keyringPassword() (string, error) {
+	if pw := os.Getenv(KeyringPasswordEnv); pw != "" {
+		return pw, nil
+	}
+	path := os.Getenv(KeyringPasswordFileEnv)
+	explicit := path != ""
+	if path == "" {
+		dir, err := configDir()
+		if err != nil {
+			return "", nil // no config dir → treat as "no password", not an error
+		}
+		path = filepath.Join(dir, keyringPasswordFile)
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) && !explicit {
+			return "", nil // default file simply absent
+		}
+		return "", fmt.Errorf("read %s: %w", KeyringPasswordFileEnv, err)
+	}
+	if info.Mode().Perm()&0o077 != 0 {
+		return "", fmt.Errorf("%s is readable by others (%#o); run: chmod 600 %s",
+			path, info.Mode().Perm(), path)
+	}
+	raw, err := os.ReadFile(path) // #nosec G304 -- path is the user's own configured password file
+	if err != nil {
+		return "", fmt.Errorf("read keyring password file: %w", err)
+	}
+	return strings.TrimRight(string(raw), "\r\n"), nil
+}
+
 // KeyringBackendEnv forces a specific credential store: "file" for the encrypted file,
 // "keyring" for the OS keyring. Unset means "OS keyring, falling back to the file".
 //
@@ -82,7 +131,11 @@ func NewStore() Store {
 	case "keyring":
 		return &keyringStore{}
 	}
-	if os.Getenv(KeyringPasswordEnv) != "" && !keyringUsable() {
+	// Auto: use the file store when the OS keyring is unavailable (headless Linux, no Secret
+	// Service) and a password is configured by any means. This is what makes the CLI work
+	// over a non-interactive `ssh host 'atlassian …'`, where no shell rc is sourced — as long
+	// as the password lives in a file the CLI reads itself rather than a shell-exported var.
+	if pw, _ := keyringPassword(); pw != "" && !keyringUsable() {
 		if fs, err := NewFileStore(""); err == nil {
 			return fs
 		}
@@ -165,9 +218,13 @@ type fileStore struct {
 // NewFileStore creates the encrypted-file store. An empty path uses credentials.enc in the
 // config directory.
 func NewFileStore(path string) (Store, error) {
-	pw := os.Getenv(KeyringPasswordEnv)
+	pw, err := keyringPassword()
+	if err != nil {
+		return nil, err
+	}
 	if pw == "" {
-		return nil, fmt.Errorf("%s must be set to use the encrypted-file credential store", KeyringPasswordEnv)
+		return nil, fmt.Errorf("set %s, or write the password to %s in the config dir, to use the encrypted-file credential store",
+			KeyringPasswordEnv, keyringPasswordFile)
 	}
 	if path == "" {
 		dir, err := configDir()

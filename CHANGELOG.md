@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-07-28
+
+### Fixed
+
+- **Credentials were unreadable from a non-interactive shell.** The encrypted-file store
+  unlocked only from `ATLASSIAN_KEYRING_PASSWORD` in the environment, which a shell rc has to
+  export — and `.bashrc`/`.zshrc` are sourced only for interactive shells. So `atlassian`
+  worked when typed in an SSH terminal but not under `ssh host 'atlassian …'`, cron, or a
+  script: the credential was stored correctly but couldn't be found, and the CLI fell through
+  to the (empty, on a headless box) OS keyring. The password now also resolves from a file —
+  `ATLASSIAN_KEYRING_PASSWORD_FILE`, or a `keyring-password` file (mode `600`) in the config
+  dir — which needs no shell setup and works in every execution context. A loosely-permissioned
+  password file is refused with a `chmod` hint rather than used.
+
 ## [0.2.1] - 2026-07-28
 
 ### Fixed
@@ -126,7 +140,8 @@ First release.
   formula-injection neutralization and terminal-escape sanitization.
 - `--dry-run` printing the equivalent curl with the credential redacted.
 
-[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jjuanrivvera/atlassian-cli/compare/v0.1.0...v0.1.1

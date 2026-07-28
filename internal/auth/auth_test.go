@@ -269,9 +269,84 @@ func TestFileStore_SaltDiffersPerWrite(t *testing.T) {
 
 func TestFileStore_RequiresPassword(t *testing.T) {
 	require.NoError(t, os.Unsetenv(KeyringPasswordEnv))
+	require.NoError(t, os.Unsetenv(KeyringPasswordFileEnv))
+	// Isolate the config dir so a real keyring-password file on the dev machine can't satisfy
+	// the lookup and mask the "no password" path this test is about.
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	_, err := NewFileStore(filepath.Join(t.TempDir(), "x.enc"))
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), KeyringPasswordEnv)
+}
+
+func TestKeyringPassword_FromExplicitFile(t *testing.T) {
+	// The whole point: no shell env, password on disk. This is what makes a non-interactive
+	// `ssh host 'atlassian …'` work, where nothing sources .bashrc/.zshrc.
+	require.NoError(t, os.Unsetenv(KeyringPasswordEnv))
+	pwFile := filepath.Join(t.TempDir(), "kp")
+	require.NoError(t, os.WriteFile(pwFile, []byte("file-secret\n"), 0o600))
+	t.Setenv(KeyringPasswordFileEnv, pwFile)
+
+	pw, err := keyringPassword()
+	require.NoError(t, err)
+	assert.Equal(t, "file-secret", pw, "a trailing newline must be trimmed")
+
+	// And it actually unlocks a round-trip.
+	store, err := NewFileStore(filepath.Join(t.TempDir(), "credentials.enc"))
+	require.NoError(t, err)
+	require.NoError(t, store.Set("acme", Credential{Token: "tok"}))
+	got, err := store.Get("acme")
+	require.NoError(t, err)
+	assert.Equal(t, "tok", got.Token)
+}
+
+func TestKeyringPassword_FromDefaultFileInConfigDir(t *testing.T) {
+	require.NoError(t, os.Unsetenv(KeyringPasswordEnv))
+	require.NoError(t, os.Unsetenv(KeyringPasswordFileEnv))
+	cfg := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", cfg)
+	require.NoError(t, os.MkdirAll(filepath.Join(cfg, "atlassian-cli"), 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(cfg, "atlassian-cli", "keyring-password"),
+		[]byte("default-secret"), 0o600))
+
+	pw, err := keyringPassword()
+	require.NoError(t, err)
+	assert.Equal(t, "default-secret", pw)
+}
+
+func TestKeyringPassword_EnvBeatsFile(t *testing.T) {
+	pwFile := filepath.Join(t.TempDir(), "kp")
+	require.NoError(t, os.WriteFile(pwFile, []byte("file-secret"), 0o600))
+	t.Setenv(KeyringPasswordFileEnv, pwFile)
+	t.Setenv(KeyringPasswordEnv, "env-secret")
+
+	pw, err := keyringPassword()
+	require.NoError(t, err)
+	assert.Equal(t, "env-secret", pw, "an explicit env var must win over the file")
+}
+
+func TestKeyringPassword_RefusesLoosePermissions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("unix permission bits")
+	}
+	require.NoError(t, os.Unsetenv(KeyringPasswordEnv))
+	pwFile := filepath.Join(t.TempDir(), "kp")
+	require.NoError(t, os.WriteFile(pwFile, []byte("secret"), 0o644))
+	t.Setenv(KeyringPasswordFileEnv, pwFile)
+
+	// A password the whole machine can read is not protecting anything. Refuse it loudly
+	// rather than use it, and never silently degrade to "no password".
+	_, err := keyringPassword()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "chmod 600")
+}
+
+func TestKeyringPassword_MissingExplicitFileErrors(t *testing.T) {
+	require.NoError(t, os.Unsetenv(KeyringPasswordEnv))
+	t.Setenv(KeyringPasswordFileEnv, filepath.Join(t.TempDir(), "does-not-exist"))
+	// An explicitly named file that isn't there is a misconfiguration worth reporting, unlike
+	// the default file simply being absent.
+	_, err := keyringPassword()
+	require.Error(t, err)
 }
 
 func TestDecodeCredential_AcceptsBareToken(t *testing.T) {
