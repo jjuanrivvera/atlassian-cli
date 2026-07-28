@@ -7,6 +7,8 @@ edit_uri: ""
 
 theme:
   name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
   features:
     - navigation.instant
     - navigation.tracking
@@ -34,6 +36,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - OAuth setup: oauth-app.md
   - Comparison: comparison.md
   - Command reference: commands/atlassian.md
 

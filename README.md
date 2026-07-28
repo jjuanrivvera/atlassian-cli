@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/assets/logo.svg" alt="" width="96" height="96">
+
 # atlassian
 
 [![CI](https://github.com/jjuanrivvera/atlassian-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/jjuanrivvera/atlassian-cli/actions/workflows/ci.yml)
@@ -161,6 +163,7 @@ Credentials go to the OS keyring — never to the config file. On a headless box
 |---|---|
 | [Command reference](https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian/) | Every command, generated from the binary |
 | [Comparison](docs/comparison.md) | Against Atlassian's Rovo MCP server, `acli` and `jira-cli` |
+| [OAuth setup](docs/oauth-app.md) | Creating a developer app, if you need `--method oauth2` |
 | [DECISIONS.md](DECISIONS.md) | Why the CLI behaves the way it does |
 | [AGENTS.md](AGENTS.md) | Contributing, and the build gate |
 
