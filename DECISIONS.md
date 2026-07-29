@@ -203,6 +203,28 @@ tracking: ECO-283 (Cloud, "Gathering Interest"), OAUTH20-2491 (Data Center, open
 public-client PKCE ships, a built-in client id becomes possible and this decision can be
 revisited.
 
+### 15. `op call` responses are not all JSON. How is a binary body handled?
+
+**Decision.** `op call` no longer assumes the response is JSON. A response is rendered as JSON
+only when **either** the `Content-Type` advertises JSON (`application/json` or a `+json` vendor
+type) **or** the body actually parses as valid JSON. Any other response — an attachment's
+`image/png`, a plain-text export — is **binary**: its bytes are streamed to stdout unchanged
+(so `atlassian op call getAttachmentContent --param id=41217 > file.png` works), or written
+byte-for-byte to the path given by the new `--out <file>` flag (create/truncate, `0644`, with a
+one-line stderr confirmation). A valid JSON body still renders through the existing
+renderer/`renderRaw` path, so nothing about JSON output changes.
+
+**Why.** `op call getAttachmentContent` returns real image bytes; the old path JSON-decoded
+every response and failed with `decode response: invalid character …` (issue #5), with no way
+to retrieve the bytes at all — `--output` selects a *format* (table|json|yaml|csv|id), not raw.
+The dual signal is deliberate belt-and-suspenders: an explicit non-JSON content type is the
+primary tell, but many gateways (and Go's own `httptest`, which sniffs a JSON body to
+`text/plain`) omit or misreport it, so the `json.Valid` fallback keeps a genuinely-JSON body on
+the unchanged path regardless of what the header claims. `--out` is a distinct flag from
+`--output` precisely because one is a destination and the other is a format. This changes
+response *handling* only — no operation is added or removed, so the manifest surface is
+unchanged.
+
 **Consequence for distribution.** None for the default path — an API token needs no app, so
 `atlassian init` remains the install-and-go route for everyone. Sharing an OAuth app in the
 developer console does not make it usable by strangers, since they still cannot complete an

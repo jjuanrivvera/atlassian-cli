@@ -164,6 +164,21 @@ func (c *Client) Do(ctx context.Context, r Request) ([]byte, error) {
 	return body, err
 }
 
+// DoRaw performs a request and returns the raw body together with the response's
+// Content-Type. It exists for callers that must decide how to handle the payload from the
+// server's own declaration rather than assuming JSON — `op call getAttachmentContent` returns
+// image bytes, so JSON-decoding it (issue #5) fails. The Content-Type is "" for a dry run.
+func (c *Client) DoRaw(ctx context.Context, r Request) ([]byte, string, error) {
+	//nolint:bodyclose // doWithResponse reads and closes the body before returning; the
+	// *http.Response it hands back is retained only for its status and headers.
+	body, resp, err := c.doWithResponse(ctx, r)
+	contentType := ""
+	if resp != nil {
+		contentType = resp.Header.Get("Content-Type")
+	}
+	return body, contentType, err
+}
+
 // DoInto performs a request and unmarshals the response into out.
 func (c *Client) DoInto(ctx context.Context, r Request, out any) error {
 	body, err := c.Do(ctx, r)

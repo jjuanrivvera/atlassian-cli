@@ -30,6 +30,7 @@ atlassian op call getIssue --param issueIdOrKey=PP-1065
 ```
   -d, --data string         request body as JSON, @file, or @- for stdin
   -h, --help                help for call
+      --out string          write the raw response body to this file (required for binary responses like attachments)
       --param stringArray   operation parameter as name=value (repeatable)
       --strict              reject parameters the operation does not document (default true)
 ```

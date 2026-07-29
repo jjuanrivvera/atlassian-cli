@@ -1,8 +1,10 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"sort"
 	"strings"
 
@@ -239,6 +241,7 @@ func newOpCallCmd(o *globalOptions) *cobra.Command {
 	var (
 		params []string
 		data   string
+		out    string
 		strict bool
 	)
 
@@ -288,7 +291,7 @@ Path parameters are substituted into the URL; everything else becomes a query pa
 			if err != nil {
 				return err
 			}
-			raw, err := client.Do(cmd.Context(), api.Request{
+			raw, contentType, err := client.DoRaw(cmd.Context(), api.Request{
 				Product: op.Product, Method: op.Method, Path: path, Query: query, Body: body,
 			})
 			if err != nil {
@@ -297,9 +300,31 @@ Path parameters are substituted into the URL; everything else becomes a query pa
 			if raw == nil { // --dry-run printed the curl
 				return nil
 			}
+
+			// --out captures the response body verbatim to a file — the only way to get bytes
+			// out of an operation that returns a binary payload (getAttachmentContent), and a
+			// convenience for JSON too.
+			if out != "" {
+				if err := os.WriteFile(out, raw, 0o644); err != nil {
+					return fmt.Errorf("write response to %s: %w", out, err)
+				}
+				o.note(cmd.ErrOrStderr(), "wrote %d bytes to %s", len(raw), out)
+				return nil
+			}
+
 			if len(strings.TrimSpace(string(raw))) == 0 {
 				o.note(cmd.ErrOrStderr(), "%s succeeded with an empty response", op.ID)
 				return nil
+			}
+
+			// A non-JSON response (an attachment's image/png, a text export) must be streamed
+			// as-is rather than JSON-decoded, which is issue #5's failure. It is treated as
+			// JSON only when the server declares a JSON content type or the body actually
+			// parses as JSON, so a valid JSON body still renders exactly as before regardless
+			// of a missing or sniffed content type.
+			if !isJSONContentType(contentType) && !json.Valid(raw) {
+				_, werr := cmd.OutOrStdout().Write(raw)
+				return werr
 			}
 			return o.renderRaw(cmd, raw)
 		},
@@ -307,6 +332,7 @@ Path parameters are substituted into the URL; everything else becomes a query pa
 
 	cmd.Flags().StringArrayVar(&params, "param", nil, "operation parameter as name=value (repeatable)")
 	cmd.Flags().StringVarP(&data, "data", "d", "", "request body as JSON, @file, or @- for stdin")
+	cmd.Flags().StringVar(&out, "out", "", "write the raw response body to this file (required for binary responses like attachments)")
 	cmd.Flags().BoolVar(&strict, "strict", true, "reject parameters the operation does not document")
 	_ = cmd.RegisterFlagCompletionFunc("param", completeOperationParams)
 
@@ -314,6 +340,17 @@ Path parameters are substituted into the URL; everything else becomes a query pa
 	// destructive. The guard refines this per-operation using the catalog's own method.
 	annotate(cmd, kindDestructive)
 	return cmd
+}
+
+// isJSONContentType reports whether a Content-Type header advertises JSON, covering both
+// `application/json` and vendor `+json` media types (e.g. `application/problem+json`). The
+// parameters after `;` (charset, boundary) are ignored.
+func isJSONContentType(ct string) bool {
+	if i := strings.IndexByte(ct, ';'); i >= 0 {
+		ct = ct[:i]
+	}
+	ct = strings.TrimSpace(strings.ToLower(ct))
+	return ct == "application/json" || strings.HasSuffix(ct, "+json")
 }
 
 // parseParams turns repeated --param name=value flags into a map, allowing repeats to build
