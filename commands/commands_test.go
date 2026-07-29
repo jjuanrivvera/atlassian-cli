@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -200,6 +202,92 @@ func TestOpCall_EscapesPathParameters(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotContains(t, out, "issue/a/b")
 	assert.Contains(t, out, "a%2Fb")
+}
+
+// TestOpCall_StreamsBinaryResponses locks in the issue #5 fix: an operation whose response is
+// not JSON (an attachment's image bytes) must be streamed unchanged, never JSON-decoded.
+func TestOpCall_StreamsBinaryResponses(t *testing.T) {
+	// A real PNG signature followed by bytes that are deliberately not valid JSON or UTF-8.
+	png := []byte("\x89PNG\r\n\x1a\n\x00\x01\x02\x03\xff\xfe{not json")
+
+	newServer := func() *httptest.Server {
+		return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "image/png")
+			_, _ = w.Write(png)
+		}))
+	}
+
+	setEnv := func(t *testing.T, url string) {
+		isolateHome(t)
+		t.Setenv("ATLASSIAN_BASE_URL", url)
+		t.Setenv("ATLASSIAN_EMAIL", "me@example.com")
+		t.Setenv("ATLASSIAN_API_TOKEN", "token")
+	}
+
+	t.Run("streams exact bytes to stdout", func(t *testing.T) {
+		srv := newServer()
+		defer srv.Close()
+		setEnv(t, srv.URL)
+
+		out, _, err := run(t, "op", "call", "getAttachmentContent", "--param", "id=41217")
+		require.NoError(t, err, "a binary response must not be JSON-decoded")
+		assert.Equal(t, string(png), out, "stdout must be the exact response bytes so `> file.png` works")
+	})
+
+	t.Run("--out writes exact bytes to a file", func(t *testing.T) {
+		srv := newServer()
+		defer srv.Close()
+		setEnv(t, srv.URL)
+
+		dst := filepath.Join(t.TempDir(), "attachment.png")
+		out, errOut, err := run(t, "op", "call", "getAttachmentContent", "--param", "id=41217", "--out", dst)
+		require.NoError(t, err)
+		assert.Empty(t, out, "with --out nothing but the file should carry the body")
+
+		got, rerr := os.ReadFile(dst)
+		require.NoError(t, rerr)
+		assert.Equal(t, png, got, "the file must hold the byte-for-byte response")
+		assert.Contains(t, errOut, dst, "a one-line confirmation belongs on stderr")
+	})
+}
+
+// TestOpCall_JSONBehaviourUnchanged proves the binary path never regresses a JSON response:
+// a valid JSON body still renders, even when the server sends no JSON content type (the exact
+// situation httptest and many gateways produce, which Go sniffs to text/plain).
+func TestOpCall_JSONBehaviourUnchanged(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		// No Content-Type set on purpose: the json.Valid fallback must still treat this as JSON.
+		_, _ = w.Write([]byte(`{"accountId":"5b10","displayName":"Juan Rivera"}`))
+	}))
+	defer srv.Close()
+
+	isolateHome(t)
+	t.Setenv("ATLASSIAN_BASE_URL", srv.URL)
+	t.Setenv("ATLASSIAN_EMAIL", "me@example.com")
+	t.Setenv("ATLASSIAN_API_TOKEN", "token")
+
+	out, _, err := run(t, "op", "call", "getCurrentUser", "-o", "json")
+	require.NoError(t, err)
+
+	var user map[string]any
+	require.NoError(t, json.Unmarshal([]byte(out), &user), "a JSON response must still decode and render as JSON")
+	assert.Equal(t, "Juan Rivera", user["displayName"])
+}
+
+func TestIsJSONContentType(t *testing.T) {
+	cases := map[string]bool{
+		"application/json":                true,
+		"application/json; charset=utf-8": true,
+		"application/problem+json":        true,
+		"application/vnd.atl.plugin+json": true,
+		"":                                false,
+		"image/png":                       false,
+		"text/plain; charset=utf-8":       false,
+		"application/octet-stream":        false,
+	}
+	for ct, want := range cases {
+		assert.Equalf(t, want, isJSONContentType(ct), "isJSONContentType(%q)", ct)
+	}
 }
 
 func TestAPI_DryRunAndProductRouting(t *testing.T) {

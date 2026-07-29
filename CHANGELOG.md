@@ -7,11 +7,25 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Fixed
+
 - CI green on Windows + gosec: the keyring-password-file group/other-readable guard is a POSIX
   permission-bit check that rejected every file on Windows (no such bits), failing the auth
   tests; it now runs only on non-Windows. The `os.Stat`/`os.ReadFile` of the user-configured
   password path carry `#nosec G304,G703` (the prior annotation only covered G304, so gosec's
   G703 taint rule flagged them).
+- **`op call` on an operation that returns binary content failed with `decode response:
+  invalid character …`.** Every response was JSON-decoded, so `op call getAttachmentContent`
+  (a real PNG) errored and there was no way to get the bytes out. A response is now treated as
+  JSON only when the server declares a JSON content type or the body actually parses as JSON;
+  anything else (image/png, a text export) is **streamed to stdout unchanged**, so
+  `atlassian op call getAttachmentContent --param id=41217 > file.png` works. A valid JSON body
+  still renders exactly as before. (#5)
+
+### Added
+
+- **`op call --out <path>`** writes the raw response body byte-for-byte to a file
+  (create/truncate, `0644`) and prints a one-line confirmation to stderr — the ergonomic way to
+  save an attachment or any binary payload without a shell redirect. (#5)
 
 ## [0.2.3] - 2026-07-28
 
