@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- CI green on Windows + gosec: the keyring-password-file group/other-readable guard is a POSIX
+  permission-bit check that rejected every file on Windows (no such bits), failing the auth
+  tests; it now runs only on non-Windows. The `os.Stat`/`os.ReadFile` of the user-configured
+  password path carry `#nosec G304,G703` (the prior annotation only covered G304, so gosec's
+  G703 taint rule flagged them).
+
 ## [0.2.3] - 2026-07-28
 
 ### Fixed

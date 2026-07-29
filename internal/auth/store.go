@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/zalando/go-keyring"
@@ -63,18 +64,21 @@ func keyringPassword() (pw string, fromFile bool, err error) {
 		}
 		path = filepath.Join(dir, keyringPasswordFile)
 	}
-	info, err := os.Stat(path)
+	info, err := os.Stat(path) // #nosec G304,G703 -- path is the user's own configured password file
 	if err != nil {
 		if os.IsNotExist(err) && !explicit {
 			return "", false, nil // default file simply absent
 		}
 		return "", false, fmt.Errorf("read %s: %w", KeyringPasswordFileEnv, err)
 	}
-	if info.Mode().Perm()&0o077 != 0 {
+	// The group/other-readable guard is a POSIX permission-bit check; Windows has no such bits
+	// (os.Stat reports 0666 regardless of how the file was created), so it would reject every
+	// password file there. Enforce it only on Unix.
+	if runtime.GOOS != "windows" && info.Mode().Perm()&0o077 != 0 {
 		return "", false, fmt.Errorf("%s is readable by others (%#o); run: chmod 600 %s",
 			path, info.Mode().Perm(), path)
 	}
-	raw, err := os.ReadFile(path) // #nosec G304 -- path is the user's own configured password file
+	raw, err := os.ReadFile(path) // #nosec G304,G703 -- path is the user's own configured password file
 	if err != nil {
 		return "", false, fmt.Errorf("read keyring password file: %w", err)
 	}
