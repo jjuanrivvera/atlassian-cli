@@ -1,8 +1,7 @@
 module github.com/jjuanrivvera/atlassian-cli
 
-go 1.25.5
+go 1.26.8
 
-toolchain go1.25.12
 
 require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
