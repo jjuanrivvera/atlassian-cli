@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `atlassian update` and `atlassian update check`: self-replace the running binary from the
+  latest GitHub release, checksum-verified and atomic, with a `.bak` rollback. Every other CLI
+  in the fleet has shipped this since 2026-07; atlassian was the only one left without it, so
+  the only way to upgrade was to download the tarball and install it by hand. The command is
+  already excluded from the MCP surface — replacing its own binary is not an agent's decision.
+
 ## [0.3.0] - 2026-07-28
 
 ### Fixed

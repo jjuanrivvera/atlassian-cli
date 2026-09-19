@@ -92,6 +92,7 @@ sending anything.
 * [atlassian spaces](atlassian_spaces)	 - Work with Confluence spaces
 * [atlassian sprints](atlassian_sprints)	 - Work with sprints
 * [atlassian statuses](atlassian_statuses)	 - List Jira workflow statuses
+* [atlassian update](atlassian_update)	 - Update atlassian to the latest GitHub release
 * [atlassian users](atlassian_users)	 - Look up Atlassian users
 * [atlassian version](atlassian_version)	 - Print version information
 * [atlassian versions](atlassian_versions)	 - Work with project versions (releases)
