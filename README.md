@@ -17,6 +17,8 @@
 
 [Documentation](https://jjuanrivvera.github.io/atlassian-cli/) · [Command reference](https://jjuanrivvera.github.io/atlassian-cli/commands/atlassian/)
 
+![atlassian in action](assets/demo.gif)
+
 </div>
 
 ---
